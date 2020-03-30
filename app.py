@@ -27,10 +27,11 @@ app.layout = html.Div(id='main-content-div', children=[
     '''),
 
     dbc.Row(justify='around', children=[
-        dbc.Col(width=4.7, children=[
+        dbc.Col(className='data-col', id='data-entry-col', width=4, children=[
             dcc.Tabs(id='data-tabs', value='my-articles-tab', children=[
                 dcc.Tab(label='My articles', value='my-articles-tab', className='data-tab', children=[
                     html.Div(id='data-entry-div', children=[
+                        html.P(" recommended taking a look at some of these articles"),
                         html.Label('Article title'),
                         dbc.Input(id='input-article-title', placeholder='Enter article title', type='text', value=''),
                         html.Br(),
@@ -41,22 +42,29 @@ app.layout = html.Div(id='main-content-div', children=[
 
                         dbc.Button('Add article', id='add-article-button', n_clicks=0, className='mr-1', color='light'),
                         html.Br(),
-
-                        dbc.Card(children=[
-                            dbc.CardBody(children=[
-
-                            ])
-                        ])
                     ])
                 ]),
                 dcc.Tab(label='Recommended articles', className='data-tab', value='recommended-articles-tab',
-                        children=[]),
+                        children=[
+                            html.Div(id='recommended-articles-text', children=[
+                                html.P("""
+                                    Based on the journals you've referred to so far, here is a list of similar articles
+                                    that we think might help you in furthering your research. Feel free to browse the
+                                    list, read through the abstracts to see if they fit your research topic, and search
+                                    them up if you think they'll be useful! These articles can be found in the arXiv
+                                    open-access data archive.
+                                """),
+                                html.Br(),
+                                dbc.Button(children='Go to arXiv', href='https://arxiv.org/', target='_blank')
+                            ])
+                        ]),
                 dcc.Tab(label='Live COVID-19 report', className='data-tab', value='live-covid-report-tab', children=[]),
             ]),
         ]),
-        dbc.Col(width=7, children=[
+        dbc.Col(className='data-col', width=7, children=[
             html.Div(id='data-display-div', children=[
                 html.Div(id='article-table-div', children=[
+                    html.H3('My articles'),
                     dbc.Table(id='article-table', children=[
                         html.Thead(children=[
                             html.Tr(children=[html.Th('Article title'), html.Th('Abstract')])
@@ -66,7 +74,7 @@ app.layout = html.Div(id='main-content-div', children=[
                 ]),
                 html.Div(id='recommendations-table-div'),
                 html.Div(id='live-covid-report-div', children=[
-                    html.Label('Cases by country'),
+                    html.H3('Cases by country'),
                     dcc.Graph(
                         id='cases-graph',
                         figure={
@@ -154,18 +162,21 @@ def get_arxiv_recommendations(table_body, n_clicks):
         'abstract': 'column-recommended-abstract'
     }).sort_values('sim', ascending=False).drop(columns='sim').head(num_of_recs).to_dict('records')
 
-    return dbc.Table(children=[
-        html.Thead(children=[
-            html.Tr(children=[html.Th('Article title'), html.Th('Authors'), html.Th('Abstract')])
-        ]),
-        html.Tbody(
-            children=[
-                html.Tr(children=[
-                    html.Td(children=[value]) for key, value in r.items()
-                ]) for r in recommendations
-            ]
-        )
-    ])
+    return [
+        html.H3('Recommended articles'),
+        dbc.Table(children=[
+            html.Thead(children=[
+                html.Tr(children=[html.Th('Article title'), html.Th('Authors'), html.Th('Abstract')])
+            ]),
+            html.Tbody(
+                children=[
+                    html.Tr(children=[
+                        html.Td(children=[value]) for key, value in r.items()
+                    ]) for r in recommendations
+                ]
+            )
+        ])
+    ]
 
 
 @app.callback(
@@ -176,11 +187,21 @@ def get_arxiv_recommendations(table_body, n_clicks):
 )
 def render_data(tab):
     if tab == 'my-articles-tab':
-        return {'maxHeight': '80vh', 'overflowX': 'auto'}, {'visibility': 'hidden', 'height': '0px'}, {'visibility': 'hidden', 'height': '0px'}
+        return (
+            {'maxHeight': '80vh', 'overflowX': 'auto'},
+            {'visibility': 'hidden', 'height': '0px', 'overflowX': 'hidden'},
+            {'visibility': 'hidden', 'height': '0px', 'overflowX': 'hidden'}
+        )
     elif tab == 'recommended-articles-tab':
-        return {'visibility': 'hidden', 'height': '0px'}, {'maxHeight': '80vh', 'overflowX': 'auto'}, {'visibility': 'hidden', 'height': '0px'}
+        return (
+            {'visibility': 'hidden', 'height': '0px', 'overflowX': 'hidden'},
+            {'maxHeight': '80vh', 'overflowX': 'auto'},
+            {'visibility': 'hidden', 'height': '0px', 'overflowX': 'hidden'})
     elif tab == 'live-covid-report-tab':
-        return {'visibility': 'hidden', 'height': '0px'}, {'visibility': 'hidden', 'height': '0px'}, {'maxHeight': '80vh', 'overflowX': 'auto'}
+        return (
+            {'visibility': 'hidden', 'height': '0px', 'overflowX': 'hidden'},
+            {'visibility': 'hidden', 'height': '0px', 'overflowX': 'hidden'},
+            {'maxHeight': '80vh', 'overflowX': 'auto'})
 
 
 if __name__ == '__main__':

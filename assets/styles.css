@@ -1,18 +1,31 @@
+body {
+    height: 100vh;
+    background-color: #EFEFE8FF;
+}
+
+.tab {
+    border: hidden!important;
+}
+
+.tab--selected {
+    color: #0A5E2AFF!important;
+    border-top: solid 2px #FE0000FF!important;
+}
+
 #main-content-div {
     margin-left: 30px;
     margin-right: 30px;
     margin-bottom: 60px;
-    font-size: 0.85rem;
 }
 
-#data-entry-div {
+#data-entry-div, #recommended-articles-text {
     margin: 1.5em 1.5em 1.5em 1.5em;
 }
 
 #data-display-div {
     align-content: right;
-    /*height: 80vh;
-    overflow-x: auto;*/
+    height: 80vh;
+    overflow-x: hidden;
 }
 
 .data-tab {
@@ -21,14 +34,16 @@
 }
 
 table {
-    max-height: 80vh;
+    max-height: 100%;
     overflow-x: auto;
 }
 
+.data-col {
+    background-color: white;
+}
 
-/*#data-display-col {
-    display: inline-block !important;
-    margin-top: 50px;
-    margin-left: 50px;
-    margin-right: 50px;
-}*/
+#data-entry-col {
+    padding: 0px;
+}
+
+
