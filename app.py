@@ -15,12 +15,10 @@ import numpy as np
 import pickle
 from sklearn.metrics.pairwise import cosine_similarity
 
-from styles import *
-
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
-app.layout = dbc.Container(children=[
+app.layout = html.Div(id='main-content-div', children=[
     html.H1(children='STEMSearch'),
     html.H2(children='Research made easy.'),
 
@@ -28,61 +26,66 @@ app.layout = dbc.Container(children=[
         Dash: A web application framework for Python.
     '''),
 
-    dcc.Tabs(id='table-tabs', value='my-articles-tab', children=[
-        dcc.Tab(label='My articles', value='my-articles-tab', children=[
-            html.Label('Article title'),
-            dbc.Input(id='input-article-title', placeholder='Enter article title', type='text', value=''),
+    dbc.Row(justify='around', children=[
+        dbc.Col(width=4.7, children=[
+            dcc.Tabs(id='data-tabs', value='my-articles-tab', children=[
+                dcc.Tab(label='My articles', value='my-articles-tab', className='data-tab', children=[
+                    html.Div(id='data-entry-div', children=[
+                        html.Label('Article title'),
+                        dbc.Input(id='input-article-title', placeholder='Enter article title', type='text', value=''),
+                        html.Br(),
 
-            html.Label('Abstract'),
-            dbc.Textarea(id='input-abstract', placeholder='Enter abstract', value=''),
+                        html.Label('Abstract'),
+                        dbc.Textarea(id='input-abstract', placeholder='Enter abstract', value=''),
+                        html.Br(),
 
-            dbc.Button('Add article', id='add-article-button', n_clicks=0, className='mr-1', color='light'),
+                        dbc.Button('Add article', id='add-article-button', n_clicks=0, className='mr-1', color='light'),
+                        html.Br(),
 
-            dbc.Table(id='article-table', children=[
-                html.Thead(children=[
-                    html.Tr(children=[html.Th('Article title'), html.Th('Abstract')])
+                        dbc.Card(children=[
+                            dbc.CardBody(children=[
+
+                            ])
+                        ])
+                    ])
                 ]),
-                html.Tbody(id='article-table-body')
-            ])
-
-
-
-            # dash_table.DataTable(
-            #     id='article-table',
-            #     columns=[{
-            #         'name': 'Article title',
-            #         'id': 'column-article-title',
-            #     }, {
-            #         'name': 'Abstract',
-            #         'id': 'column-abstract',
-            #     }],
-            #     data=[{'column-article-title': '', 'column-abstract': ''}],
-            #     row_deletable=True
-            # ),
+                dcc.Tab(label='Recommended articles', className='data-tab', value='recommended-articles-tab',
+                        children=[]),
+                dcc.Tab(label='Live COVID-19 report', className='data-tab', value='live-covid-report-tab', children=[]),
+            ]),
         ]),
-        dcc.Tab(label='Recommended articles', value='recommended-articles-tab',
-                children=[html.Div(id='recommendations-table')]),
-    ]),
-
-    html.Div(children=[
-        html.Label('Cases by country'),
-        dcc.Graph(
-            id='cases-graph',
-            figure={
-                'data': [{
-                    'x': df['population'].head(100),
-                    'y': df['confirmed'].head(100),
-                    'text': df['name'].head(100),
-                    'mode': 'markers'
-                }],
-                'layout': {
-                    'xaxis': {'title': 'Population', 'type': 'log'},
-                    'yaxis': {'title': 'Confirmed Cases', 'type': 'log'}
-                }
-            }
-        )
+        dbc.Col(width=7, children=[
+            html.Div(id='data-display-div', children=[
+                html.Div(id='article-table-div', children=[
+                    dbc.Table(id='article-table', children=[
+                        html.Thead(children=[
+                            html.Tr(children=[html.Th('Article title'), html.Th('Abstract')])
+                        ]),
+                        html.Tbody(id='article-table-body')
+                    ]),
+                ]),
+                html.Div(id='recommendations-table-div'),
+                html.Div(id='live-covid-report-div', children=[
+                    html.Label('Cases by country'),
+                    dcc.Graph(
+                        id='cases-graph',
+                        figure={
+                            'data': [{
+                                'x': df['population'].head(100),
+                                'y': df['confirmed'].head(100),
+                                'text': df['name'].head(100),
+                                'mode': 'markers'
+                            }],
+                            'layout': {
+                                'xaxis': {'title': 'Population', 'type': 'log'},
+                                'yaxis': {'title': 'Confirmed Cases', 'type': 'log'}
+                            }
+                        }
+                    ),
+                ]),
+            ])
+        ])
     ])
-
 
 
 
@@ -112,8 +115,7 @@ def add_row(n_clicks, article, abstract, table_body):
 
 
 @app.callback(
-    # Output('recommendations-table', 'data'),
-    Output('recommendations-table', 'children'),
+    Output('recommendations-table-div', 'children'),
     [Input('article-table-body', 'children')],
     [State('add-article-button', 'n_clicks')]
 )
@@ -164,6 +166,21 @@ def get_arxiv_recommendations(table_body, n_clicks):
             ]
         )
     ])
+
+
+@app.callback(
+    [Output('article-table-div', 'style'),
+     Output('recommendations-table-div', 'style'),
+     Output('live-covid-report-div', 'style')],
+    [Input('data-tabs', 'value')]
+)
+def render_data(tab):
+    if tab == 'my-articles-tab':
+        return {'maxHeight': '80vh', 'overflowX': 'auto'}, {'visibility': 'hidden', 'height': '0px'}, {'visibility': 'hidden', 'height': '0px'}
+    elif tab == 'recommended-articles-tab':
+        return {'visibility': 'hidden', 'height': '0px'}, {'maxHeight': '80vh', 'overflowX': 'auto'}, {'visibility': 'hidden', 'height': '0px'}
+    elif tab == 'live-covid-report-tab':
+        return {'visibility': 'hidden', 'height': '0px'}, {'visibility': 'hidden', 'height': '0px'}, {'maxHeight': '80vh', 'overflowX': 'auto'}
 
 
 if __name__ == '__main__':
