@@ -68,3 +68,12 @@ def find_similar_articles(df: pd.DataFrame, model, vectorizer,
 
 
 df = pd.DataFrame(process_covid_data(country_data)).T.sort_values('confirmed', ascending=False)
+
+
+{'props':
+     {'children': [
+         {'props': {'children': "'Infectious diarrhea: Pathogenesis and risk factors'"}, 'type': 'Td', 'namespace': 'dash_html_components'},
+         {'props': {'children': 'Abstract Middle-aged female identical twins, one of whom had systemic lupus erythematosus (SLE), were evaluated for \nimmunologic reactivity to previous antigenic challenges, including primary immunization with a foreign antigen, \nkeyhole limpet hemocyanin (KLH). These two women had lived together for all of their 58 years and neither was \nreceiving anti-inflammatory or immunosuppressive drugs at the time of these studies. Both twins demonstrated \ncomparable 7S and 198 humoral antibody response to KLH, as well as similar viral antibody titers. However, the twin\nwith SLE was anergic to common antigens, streptokinase-streptodornase, Trichophyton and Candida; furthermore delayed \nhypersensitivity to KLH did not develop after immunization. This observed discrepancy between humoral and cellular \nimmunity in genetically similar subjects may be significant in the pathogenesis of SLE.'}, 'type': 'Td', 'namespace': 'dash_html_components'}
+     ]}, 'type': 'Tr', 'namespace': 'dash_html_components'
+ }
+

@@ -20,7 +20,7 @@ from styles import *
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
-app.layout = html.Div(children=[
+app.layout = dbc.Container(children=[
     html.H1(children='STEMSearch'),
     html.H2(children='Research made easy.'),
 
@@ -28,55 +28,41 @@ app.layout = html.Div(children=[
         Dash: A web application framework for Python.
     '''),
 
-    dbc.Container([
-        dash_table.DataTable(
-            id='article-table',
-            columns=[{
-                'name': 'Article title',
-                'id': 'column-article-title',
-            }, {
-                'name': 'Abstract',
-                'id': 'column-abstract',
-            }],
-            data=[{'column-article-title': '', 'column-abstract': ''}],
-            row_deletable=True
-        ),
+    dcc.Tabs(id='table-tabs', value='my-articles-tab', children=[
+        dcc.Tab(label='My articles', value='my-articles-tab', children=[
+            html.Label('Article title'),
+            dbc.Input(id='input-article-title', placeholder='Enter article title', type='text', value=''),
 
-        html.Label('Article title'),
-        dcc.Input(id='input-article-title', placeholder='Enter article title', type='text', value=''),
+            html.Label('Abstract'),
+            dbc.Textarea(id='input-abstract', placeholder='Enter abstract', value=''),
 
-        html.Label('Abstract'),
-        dcc.Textarea(id='input-abstract', placeholder='Enter abstract', value=''),
+            dbc.Button('Add article', id='add-article-button', n_clicks=0, className='mr-1', color='light'),
 
-        html.Button('Add article', id='add-article-button', n_clicks=0),
+            dbc.Table(id='article-table', children=[
+                html.Thead(children=[
+                    html.Tr(children=[html.Th('Article title'), html.Th('Abstract')])
+                ]),
+                html.Tbody(id='article-table-body')
+            ])
+
+
+
+            # dash_table.DataTable(
+            #     id='article-table',
+            #     columns=[{
+            #         'name': 'Article title',
+            #         'id': 'column-article-title',
+            #     }, {
+            #         'name': 'Abstract',
+            #         'id': 'column-abstract',
+            #     }],
+            #     data=[{'column-article-title': '', 'column-abstract': ''}],
+            #     row_deletable=True
+            # ),
+        ]),
+        dcc.Tab(label='Recommended articles', value='recommended-articles-tab',
+                children=[html.Div(id='recommendations-table')]),
     ]),
-
-    # html.Div(children=[
-    #     dash_table.DataTable(
-    #         id='recommendations-table',
-    #         columns=[{
-    #             'name': 'Article title',
-    #             'id': 'column-recommended-article-title',
-    #         }, {
-    #             'name': 'Author(s)',
-    #             'id': 'column-recommended-article-author'
-    #         }, {
-    #             'name': 'Abstract',
-    #             'id': 'column-recommended-abstract',
-    #         }],
-    #         data=[{
-    #             'column-recommended-article-title': '',
-    #             'column-recommended-article-author': '',
-    #             'column-recommended-abstract': ''
-    #         }],
-    #         # data=[{}],
-    #         # editable=True,
-    #         row_deletable=True,
-    #         style_cell={'textAlign': 'left', 'height': '10'},
-    #     ),
-    # ], style=container),
-
-    dbc.Container(id='recommendations-table'),
 
     html.Div(children=[
         html.Label('Cases by country'),
@@ -104,35 +90,46 @@ app.layout = html.Div(children=[
 
 
 @app.callback(
-    [Output('article-table', 'data'),
+    [Output('article-table-body', 'children'),
      Output('input-article-title', 'value'),
      Output('input-abstract', 'value')],
     [Input('add-article-button', 'n_clicks')],
     [State('input-article-title', 'value'),
      State('input-abstract', 'value'),
-     State('article-table', 'data')])
-def add_row(n_clicks, article, abstract, rows):
+     State('article-table-body', 'children')])
+def add_row(n_clicks, article, abstract, table_body):
+    # if n_clicks == 1:
+    #     rows = [{'column-article-title': article, 'column-abstract': abstract}]
+    # elif n_clicks > 1:
+    #     rows.append({'column-article-title': article, 'column-abstract': abstract})
+    # return rows, '', ''
     if n_clicks == 1:
-        rows = [{'column-article-title': article, 'column-abstract': abstract}]
+        table_body = [html.Tr(children=[html.Td(article), html.Td(abstract)])]
     elif n_clicks > 1:
-        rows.append({'column-article-title': article, 'column-abstract': abstract})
-    return rows, '', ''
+        table_body.append(html.Tr(children=[html.Td(article), html.Td(abstract)]))
+
+    return table_body, '', ''
 
 
 @app.callback(
     # Output('recommendations-table', 'data'),
     Output('recommendations-table', 'children'),
-    [Input('article-table', 'data')],
+    [Input('article-table-body', 'children')],
     [State('add-article-button', 'n_clicks')]
 )
-def get_arxiv_recommendations(articles, n_clicks):
+def get_arxiv_recommendations(table_body, n_clicks):
     if n_clicks == 0:
-        # return [{
-        #     'column-recommended-article-title': '',
-        #     'column-recommended-article-author': '',
-        #     'column-recommended-abstract': ''
-        # }]
         return
+
+    articles = []
+    for row in table_body:
+        print('ROW:')
+        print(row)
+        tds = row['props']['children']
+        articles.append({
+            'column-article-title': tds[0]['props']['children'],
+            'column-abstract': tds[1]['props']['children']
+        })
 
     print('get arxiv recs')
     recommendations = pd.DataFrame()
@@ -155,7 +152,6 @@ def get_arxiv_recommendations(articles, n_clicks):
         'abstract': 'column-recommended-abstract'
     }).sort_values('sim', ascending=False).drop(columns='sim').head(num_of_recs).to_dict('records')
 
-    # return recommendations
     return dbc.Table(children=[
         html.Thead(children=[
             html.Tr(children=[html.Th('Article title'), html.Th('Authors'), html.Th('Abstract')])
