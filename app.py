@@ -1,6 +1,7 @@
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
+import dash_daq as daq
 import dash_table
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
@@ -31,7 +32,6 @@ app.layout = html.Div(id='main-content-div', children=[
             dcc.Tabs(id='data-tabs', value='my-articles-tab', children=[
                 dcc.Tab(label='My articles', value='my-articles-tab', className='data-tab', children=[
                     html.Div(id='data-entry-div', children=[
-                        html.P(" recommended taking a look at some of these articles"),
                         html.Label('Article title'),
                         dbc.Input(id='input-article-title', placeholder='Enter article title', type='text', value=''),
                         html.Br(),
@@ -44,55 +44,109 @@ app.layout = html.Div(id='main-content-div', children=[
                         html.Br(),
                     ])
                 ]),
+
                 dcc.Tab(label='Recommended articles', className='data-tab', value='recommended-articles-tab',
                         children=[
-                            html.Div(id='recommended-articles-text', children=[
-                                html.P("""
-                                    Based on the journals you've referred to so far, here is a list of similar articles
+                            html.Div(id='recommended-articles-text-div', children=[
+                                daq.ToggleSwitch(
+                                    id='database-switch',
+                                    # color='#FE0000FF',
+                                    label=[{'label': 'arXiv', 'style': {'color': '#FE0000FF'}},
+                                           {'label': 'CORD-19'}]
+                                ),
+                                html.Br(),
+                                html.P(id='recommended-articles-arxiv-text', style={'color': '#0A5E2AFF'}, children="""
+                                    Based on the journals you've referenced so far, here is a list of similar articles
                                     that we think might help you in furthering your research. Feel free to browse the
                                     list, read through the abstracts to see if they fit your research topic, and search
                                     them up if you think they'll be useful! These articles can be found in the arXiv
                                     open-access data archive.
                                 """),
                                 html.Br(),
-                                dbc.Button(children='Go to arXiv', href='https://arxiv.org/', target='_blank')
+                                dbc.Button(
+                                    id='arxiv-link',
+                                    color='danger',
+                                    children='Go to arXiv',
+                                    href='https://arxiv.org/',
+                                    target='_blank',
+                                    style={'backgroundColor': '#FE0000FF', 'borderColor': '#FE0000FF'}
+                                ),
+                                html.Br(),
+                                html.Br(),
+                                html.P(
+                                    id='recommended-articles-cord-19-text',
+                                    children="""
+                                    If your research is specific to the COVID-19 pandemic, you may find it useful
+                                    """,
+                                    style={'borderTop': '#FE0000FF'}
+                                ),
+                                html.Br(),
+                                dbc.Button(
+                                    id='cord-19-link',
+                                    color='light',
+                                    children='Go to CORD-19',
+                                    href='https://pages.semanticscholar.org/coronavirus-research',
+                                    target='_blank'
+                                ),
                             ])
                         ]),
+
                 dcc.Tab(label='Live COVID-19 report', className='data-tab', value='live-covid-report-tab', children=[]),
             ]),
         ]),
+
+
         dbc.Col(className='data-col', width=7, children=[
-            html.Div(id='data-display-div', children=[
+            dbc.Card(id='data-display-card', children=[
                 html.Div(id='article-table-div', children=[
-                    html.H3('My articles'),
-                    dbc.Table(id='article-table', children=[
-                        html.Thead(children=[
-                            html.Tr(children=[html.Th('Article title'), html.Th('Abstract')])
+                    dbc.CardHeader(className='data-display-header', children='My articles'),
+                    dbc.CardBody(className='data-display-body', children=[
+                        dbc.Table(id='article-table', children=[
+                            html.Thead(children=[
+                                html.Tr(children=[html.Th('Article title'), html.Th('Abstract')])
+                            ]),
+                            html.Tbody(id='article-table-body')
                         ]),
-                        html.Tbody(id='article-table-body')
                     ]),
                 ]),
-                html.Div(id='recommendations-table-div'),
+
+                html.Div(id='recommendations-table-div', children=[
+                    dcc.Loading(color='#FE0000FF', children=[
+                        dbc.CardHeader(className='data-display-header', children='Recommended articles'),
+                        dbc.CardBody(className='data-display-body', children=[
+                            dbc.Table(children=[
+                                html.Thead(children=[
+                                    html.Tr(children=[html.Th('Article title'), html.Th('Authors'), html.Th('Abstract')])
+                                ]),
+                                html.Tbody(id='recommendations-table-body')
+                            ]),
+                        ]),
+                    ]),
+                ]),
+
                 html.Div(id='live-covid-report-div', children=[
-                    html.H3('Cases by country'),
-                    dcc.Graph(
-                        id='cases-graph',
-                        figure={
-                            'data': [{
-                                'x': df['population'].head(100),
-                                'y': df['confirmed'].head(100),
-                                'text': df['name'].head(100),
-                                'mode': 'markers'
-                            }],
-                            'layout': {
-                                'xaxis': {'title': 'Population', 'type': 'log'},
-                                'yaxis': {'title': 'Confirmed Cases', 'type': 'log'}
+                    dbc.CardHeader(className='data-display-header', children='Cases by country'),
+                    dbc.CardBody(className='data-display-body', children=[
+                        dcc.Graph(
+                            id='cases-graph',
+                            figure={
+                                'data': [{
+                                    'x': df['population'].head(100),
+                                    'y': df['confirmed'].head(100),
+                                    'text': df['name'].head(100),
+                                    'mode': 'markers'
+                                }],
+                                'layout': {
+                                    'xaxis': {'title': 'Population', 'type': 'log'},
+                                    'yaxis': {'title': 'Confirmed Cases', 'type': 'log'}
+                                }
                             }
-                        }
-                    ),
+                        ),
+                    ]),
                 ]),
             ])
         ])
+
     ])
 
 
@@ -123,11 +177,11 @@ def add_row(n_clicks, article, abstract, table_body):
 
 
 @app.callback(
-    Output('recommendations-table-div', 'children'),
-    [Input('article-table-body', 'children')],
-    [State('add-article-button', 'n_clicks')]
+    Output('recommendations-table-body', 'children'),
+    [Input('article-table-body', 'children'), Input('database-switch', 'value')],
+    [State('add-article-button', 'n_clicks')]  #TODO: include state of data set button to know which dataset to do it on
 )
-def get_arxiv_recommendations(table_body, n_clicks):
+def get_arxiv_recommendations(table_body, db_covid, n_clicks):
     if n_clicks == 0:
         return
 
@@ -141,19 +195,23 @@ def get_arxiv_recommendations(table_body, n_clicks):
             'column-abstract': tds[1]['props']['children']
         })
 
-    print('get arxiv recs')
+    if db_covid:
+        papers, model, vectorizer = covid_papers, covid_model, covid_vectorizer
+    else:
+        papers, model, vectorizer = arxiv_papers, arxiv_model, arxiv_vectorizer
+
     recommendations = pd.DataFrame()
     for row in articles:
         title = row['column-article-title']
         abstract = row['column-abstract']
         print('TITLE: {}'.format(title))
         print('ABSTRACT: {}'.format(abstract))
-        vec = arxiv_vectorizer.transform([title * 3 + abstract])
-        cluster = arxiv_model.predict(vec)
+        vec = vectorizer.transform([title * 3 + abstract])
+        cluster = model.predict(vec)
 
         recommendations = pd.concat(
             [recommendations,
-             find_similar_articles(arxiv_papers, arxiv_model, arxiv_vectorizer, title, abstract, cluster[0])],
+             find_similar_articles(papers, model, vectorizer, title, abstract, cluster[0])],
             ignore_index=True)
 
     recommendations = recommendations.rename(columns={
@@ -163,19 +221,9 @@ def get_arxiv_recommendations(table_body, n_clicks):
     }).sort_values('sim', ascending=False).drop(columns='sim').head(num_of_recs).to_dict('records')
 
     return [
-        html.H3('Recommended articles'),
-        dbc.Table(children=[
-            html.Thead(children=[
-                html.Tr(children=[html.Th('Article title'), html.Th('Authors'), html.Th('Abstract')])
-            ]),
-            html.Tbody(
-                children=[
-                    html.Tr(children=[
-                        html.Td(children=[value]) for key, value in r.items()
-                    ]) for r in recommendations
-                ]
-            )
-        ])
+        html.Tr(children=[
+            html.Td(children=[value]) for key, value in r.items()
+        ]) for r in recommendations
     ]
 
 
@@ -203,6 +251,28 @@ def render_data(tab):
             {'visibility': 'hidden', 'height': '0px', 'overflowX': 'hidden'},
             {'maxHeight': '80vh', 'overflowX': 'auto'})
 
+
+@app.callback(
+    [Output('database-switch', 'label'),
+     Output('recommended-articles-arxiv-text', 'style'),
+     Output('arxiv-link', 'color'),
+     Output('arxiv-link', 'style'),
+     Output('recommended-articles-cord-19-text', 'style'),
+     Output('cord-19-link', 'color'),
+     Output('cord-19-link', 'style')],  # TODO: update button
+    [Input('database-switch', 'value')],
+)
+def toggle_database(db_covid):
+    if db_covid:
+        return [
+            {'label': 'arXiv'},
+            {'label': 'CORD-19', 'style': {'color': '#FE0000FF'}}
+        ], None, 'light', None, {'color': '#0A5E2AFF'}, 'danger', {'borderColor': '#FE0000FF', 'backgroundColor': '#FE0000FF'}
+    else:
+        return [
+            {'label': 'arXiv', 'style': {'color': '#FE0000FF'}},
+            {'label': 'CORD-19'}
+        ], {'color': '#0A5E2AFF'}, 'danger', {'borderColor': '#FE0000FF', 'backgroundColor': '#FE0000FF'}, None, 'light', None
 
 if __name__ == '__main__':
     app.run_server(debug=True)

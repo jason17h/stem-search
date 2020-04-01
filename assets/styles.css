@@ -18,14 +18,35 @@ body {
     margin-bottom: 60px;
 }
 
-#data-entry-div, #recommended-articles-text {
+#data-entry-div, #recommended-articles-text-div {
     margin: 1.5em 1.5em 1.5em 1.5em;
 }
 
-#data-display-div {
+#data-display-card {
     align-content: right;
     height: 80vh;
     overflow-x: hidden;
+    border: hidden;
+    border-radius: 0px;
+}
+
+.data-display-header {
+    font-size: 1.1rem;
+    font-weight: bold;
+    padding-top: 1.2em;
+    padding-bottom: 1.2em;
+    border-radius: 0px!important;
+    border-top: solid 2px #FE0000FF;
+    border-bottom: hidden;
+    margin-left: 0px;
+    margin-right: 0px;
+    color: #0A5E2AFF;
+    background-color: white;
+    /*background-color: #6DAC4FFF;*/
+}
+
+.data-display-body {
+    padding-top: 0px;
 }
 
 .data-tab {
@@ -40,6 +61,13 @@ table {
 
 .data-col {
     background-color: white;
+    padding-left: 0px;
+    padding-right: 0px;
+}
+
+.data-col th {
+    background-color: #EFEFE8FF;
+    color: #0A5E2AFF;
 }
 
 #data-entry-col {
