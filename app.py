@@ -91,7 +91,46 @@ app.layout = html.Div(id='main-content-div', children=[
                             ])
                         ]),
 
-                dcc.Tab(label='Live COVID-19 report', className='data-tab', value='live-covid-report-tab', children=[]),
+                dcc.Tab(label='Live COVID-19 report', className='data-tab', value='live-covid-report-tab', children=[
+                    html.Div(id='covid-data-selection-div', children=[
+                        html.Label('Countries'),
+                        dcc.Dropdown(
+                            id='select-country-dropdown',
+                            options=[{'label': 'All countries', 'value': 'ALL'}] + [
+                                {'label': row[1]['country'], 'value': row[0]}
+                                for row in df_current.loc[:, ['country']].sort_values('country').iterrows()
+                            ],
+                            value='ALL',
+                            multi=True,
+                        ),
+
+                        html.Label('X axis'),
+                        dcc.Dropdown(
+                            options=[
+                                {'label': col.capitalize(), 'value': col}
+                                for col in ['confirmed', 'country', 'critical', 'deaths', 'population', 'recovered']
+                            ],
+                            value='population'
+                        ),
+
+                        html.Label('Y axis'),
+                        dcc.Dropdown(
+                            options=[
+                                {'label': col.capitalize(), 'value': col}
+                                for col in ['confirmed', 'critical', 'deaths', 'population', 'recovered']
+                            ],
+                            value='confirmed'
+                        ),
+
+                        html.Label('Filter'),
+                        dcc.Dropdown(
+                            options=[
+                                {'label': 'Top N', 'value': 'topN'}
+                            ],
+                            value='confirmed'
+                        ),
+                    ]),
+                ]),
             ]),
         ]),
 
@@ -131,9 +170,9 @@ app.layout = html.Div(id='main-content-div', children=[
                             id='cases-graph',
                             figure={
                                 'data': [{
-                                    'x': df['population'].head(100),
-                                    'y': df['confirmed'].head(100),
-                                    'text': df['name'].head(100),
+                                    'x': df_current['population'],#.head(100),
+                                    'y': df_current['confirmed'],#.head(100),
+                                    'text': df_current['country'],#.head(100),
                                     'mode': 'markers'
                                 }],
                                 'layout': {
@@ -250,6 +289,13 @@ def render_data(tab):
             {'visibility': 'hidden', 'height': '0px', 'overflowX': 'hidden'},
             {'visibility': 'hidden', 'height': '0px', 'overflowX': 'hidden'},
             {'maxHeight': '80vh', 'overflowX': 'auto'})
+
+
+# @app.callback(
+#     [Input('select-country-dropdown', 'value')]
+# )
+# def control_covid_data(countries, ):
+#     pass
 
 
 @app.callback(

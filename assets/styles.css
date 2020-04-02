@@ -18,7 +18,7 @@ body {
     margin-bottom: 60px;
 }
 
-#data-entry-div, #recommended-articles-text-div {
+#data-entry-div, #recommended-articles-text-div, #covid-data-selection-div {
     margin: 1.5em 1.5em 1.5em 1.5em;
 }
 
