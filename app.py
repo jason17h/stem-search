@@ -5,6 +5,8 @@ import dash_daq as daq
 import dash_table
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
+import plotly.graph_objects as go
+import plotly.express as px
 
 from utils import *
 
@@ -23,15 +25,11 @@ app.layout = html.Div(id='main-content-div', children=[
     html.H1(children='STEMSearch'),
     html.H2(children='Research made easy.'),
 
-    html.Div(children='''
-        Dash: A web application framework for Python.
-    '''),
-
-    dbc.Row(justify='around', children=[
+    dbc.Row(justify='between', children=[
         dbc.Col(className='data-col', id='data-entry-col', width=4, children=[
             dcc.Tabs(id='data-tabs', value='my-articles-tab', children=[
                 dcc.Tab(label='My articles', value='my-articles-tab', className='data-tab', children=[
-                    html.Div(id='data-entry-div', children=[
+                    html.Div(className='data-entry-div', children=[
                         html.Label('Article title'),
                         dbc.Input(id='input-article-title', placeholder='Enter article title', type='text', value=''),
                         html.Br(),
@@ -47,7 +45,7 @@ app.layout = html.Div(id='main-content-div', children=[
 
                 dcc.Tab(label='Recommended articles', className='data-tab', value='recommended-articles-tab',
                         children=[
-                            html.Div(id='recommended-articles-text-div', children=[
+                            html.Div(className='data-entry-div', children=[
                                 daq.ToggleSwitch(
                                     id='database-switch',
                                     # color='#FE0000FF',
@@ -92,7 +90,7 @@ app.layout = html.Div(id='main-content-div', children=[
                         ]),
 
                 dcc.Tab(label='Live COVID-19 report', className='data-tab', value='live-covid-report-tab', children=[
-                    html.Div(id='covid-data-selection-div', children=[
+                    html.Div(className='data-entry-div', children=[
                         html.Label('Countries'),
                         dcc.Dropdown(
                             id='select-country-dropdown',
@@ -173,21 +171,46 @@ app.layout = html.Div(id='main-content-div', children=[
                                     'x': df_current['population'],#.head(100),
                                     'y': df_current['confirmed'],#.head(100),
                                     'text': df_current['country'],#.head(100),
-                                    'mode': 'markers'
+                                    'mode': 'markers',
+                                    'marker': {'color': '#FE0000FF'},
                                 }],
                                 'layout': {
+                                    'title': 'Cases',
                                     'xaxis': {'title': 'Population', 'type': 'log'},
-                                    'yaxis': {'title': 'Confirmed Cases', 'type': 'log'}
-                                }
-                            }
+                                    'yaxis': {'title': 'Confirmed Cases', 'type': 'log'},
+                                },
+                            },
+                            style={'height': '100%', 'width': '100%'},
                         ),
                     ]),
                 ]),
             ])
         ])
+    ]),
 
-    ])
 
+    dbc.Row(id='nlp-dashboard-row', justify='around', children=[
+        dbc.Col(width=4, children=[
+            html.Label('Top words to display'),
+            dcc.Slider(
+                id='top-n-words-slider',
+                min=1,
+                max=100,
+                value=25,
+                marks={
+                    1: {'label': '1'},
+                    25: {'label': '25'},
+                    50: {'label': '50'},
+                    75: {'label': '75'},
+                    100: {'label': '100'},
+                }
+            ),
+            html.Div(id='nlp-dashboard-bar')
+        ]),
+        dbc.Col(width=8, children=[
+            'bye'
+        ]),
+    ]),
 
 
 ])
@@ -218,9 +241,9 @@ def add_row(n_clicks, article, abstract, table_body):
 @app.callback(
     Output('recommendations-table-body', 'children'),
     [Input('article-table-body', 'children'), Input('database-switch', 'value')],
-    [State('add-article-button', 'n_clicks')]  #TODO: include state of data set button to know which dataset to do it on
+    [State('add-article-button', 'n_clicks')]
 )
-def get_arxiv_recommendations(table_body, db_covid, n_clicks):
+def get_recommendations(table_body, db_covid, n_clicks):
     if n_clicks == 0:
         return
 
@@ -251,7 +274,8 @@ def get_arxiv_recommendations(table_body, db_covid, n_clicks):
         recommendations = pd.concat(
             [recommendations,
              find_similar_articles(papers, model, vectorizer, title, abstract, cluster[0])],
-            ignore_index=True)
+            ignore_index=True
+        )
 
     recommendations = recommendations.rename(columns={
         'title': 'column-recommended-article-title',
@@ -319,6 +343,46 @@ def toggle_database(db_covid):
             {'label': 'arXiv', 'style': {'color': '#FE0000FF'}},
             {'label': 'CORD-19'}
         ], {'color': '#0A5E2AFF'}, 'danger', {'borderColor': '#FE0000FF', 'backgroundColor': '#FE0000FF'}, None, 'light', None
+
+
+@app.callback(
+    Output('nlp-dashboard-bar', 'children'),
+    [Input('article-table-body', 'children')],
+    [State('add-article-button', 'n_clicks')]
+)
+def render_nlp_dashboard(table_body, n_clicks):
+    if n_clicks == 0:
+        return
+
+    articles = []
+    for row in table_body:
+        print('ROW:')
+        print(row)
+        tds = row['props']['children']
+        articles.append({
+            'column-article-title': tds[0]['props']['children'],
+            'column-abstract': tds[1]['props']['children']
+        })
+
+    articles = pd.DataFrame(articles)
+    top_words = pd.DataFrame(
+        top_n_words(get_text(articles['column-article-title'], articles['column-abstract']), arxiv_vectorizer, 100)
+    ).rename(columns={0: 'word', 1: 'freq'}).sort_values('freq', ascending=True)
+
+    return dcc.Graph(
+        style={'height': '100%'},
+        figure=go.Figure(go.Bar(
+            y=top_words['word'],
+            x=top_words['freq'],
+            orientation='h',
+            marker={'color': 'red'},
+        )).update_layout(
+            # title='NLP Dash',
+            xaxis={'title': 'Frequency'},
+            yaxis={'title': 'Word'},
+        )
+    )
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)

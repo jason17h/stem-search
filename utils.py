@@ -28,6 +28,11 @@ with open('model/covid_tfidf_vectorizer.pkl', 'rb') as f:
     covid_vectorizer = pickle.load(f)
 
 
+def get_text(title: typing.Union[pd.Series, str],
+             abstract: typing.Union[pd.Series, str]) -> typing.Union[pd.Series, str]:
+    return title * 3 + abstract
+
+
 def process_current_covid_data(data: typing.List[dict]) -> dict:
     master = dict()
     for country in data:
@@ -50,9 +55,8 @@ def find_similar_articles(df: pd.DataFrame, model, vectorizer,
                           title: str, abstract: str, cluster_label: int) -> pd.DataFrame:
     this_cluster = model.labels_ == cluster_label
     similar_papers = df.loc[this_cluster]
-    this_vector = vectorizer.transform([title * 3 + abstract])
-    that_vector = vectorizer.transform(similar_papers.loc[:, 'title'] * 3
-                                             + similar_papers.loc[:, 'abstract'])
+    this_vector = vectorizer.transform([get_text(title, abstract)])
+    that_vector = vectorizer.transform(get_text(similar_papers.loc[:, 'title'], similar_papers.loc[:, 'abstract']))
 
     similarities = cosine_similarity(that_vector, this_vector)
     similar_papers['sim'] = similarities
@@ -72,4 +76,11 @@ df_current = pd.DataFrame(
 ).T.sort_values('confirmed', ascending=False).rename(columns={'name': 'country'})
 
 
+def top_n_words(s: typing.Union[pd.Series, typing.List[str]],
+                vec, n: int = None) -> typing.List[typing.Tuple[str, float]]:
+    bow = vec.transform(s)
+    sum_words = bow.sum(axis=0)
+    words = [(w, sum_words[0, i]) for w, i in vec.vocabulary_.items() if sum_words[0, i] != 0]
+    words = sorted(words, key=lambda x: x[1], reverse=True)
+    return words[:n]
 
