@@ -10,13 +10,10 @@ import plotly.express as px
 
 from utils import *
 
-import requests
 import typing
 
 import pandas as pd
 import numpy as np
-import pickle
-from sklearn.metrics.pairwise import cosine_similarity
 
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
@@ -227,16 +224,19 @@ app.layout = html.Div(id='main-content-div', children=[
      State('input-abstract', 'value'),
      State('article-table-body', 'children')]
 )
-def add_row(n_clicks, article, abstract, table_body):
-    # if n_clicks == 1:
-    #     rows = [{'column-article-title': article, 'column-abstract': abstract}]
-    # elif n_clicks > 1:
-    #     rows.append({'column-article-title': article, 'column-abstract': abstract})
-    # return rows, '', ''
+def add_row(n_clicks, title, abstract, table_body):
+    """
+    Updates the 'My Articles' table with a new article
+    :param n_clicks: Number of times the 'Add Article' button has been clicked
+    :param title: Title of the new article
+    :param abstract: Abstract of the new article
+    :param table_body: The body of the table to update
+    :return: Updated table body, and empty strings to clear the title & abstract input boxes
+    """
     if n_clicks == 1:
-        table_body = [html.Tr(children=[html.Td(article), html.Td(abstract)])]
+        table_body = [html.Tr(children=[html.Td(title), html.Td(abstract)])]
     elif n_clicks > 1:
-        table_body.append(html.Tr(children=[html.Td(article), html.Td(abstract)]))
+        table_body.append(html.Tr(children=[html.Td(title), html.Td(abstract)]))
 
     return table_body, '', ''
 
@@ -247,9 +247,17 @@ def add_row(n_clicks, article, abstract, table_body):
     [State('add-article-button', 'n_clicks')]
 )
 def get_recommendations(table_body, db_covid, n_clicks):
+    """
+    Get the recommended articles based on the updated user articles table
+    :param table_body: The recommendations table body
+    :param db_covid: Boolean value from the database switch – True if the switch is set to CORD-19
+    :param n_clicks: Number of times the add article button has been clicked
+    :return:
+    """
     if n_clicks == 0:
         return
 
+    # Process the table body into a usable format (e.g. a list)
     articles = []
     for row in table_body:
         tds = row['props']['children']
@@ -258,11 +266,13 @@ def get_recommendations(table_body, db_covid, n_clicks):
             'column-abstract': tds[1]['props']['children']
         })
 
+    # Set the appropriate DataFrame, model and vectorizer
     if db_covid:
         papers, model, vectorizer = covid_papers, covid_model, covid_vectorizer
     else:
         papers, model, vectorizer = arxiv_papers, arxiv_model, arxiv_vectorizer
 
+    # Iterate through the each article and get the recommended articles
     recommendations = pd.DataFrame()
     for row in articles:
         title = row['column-article-title']
@@ -276,7 +286,8 @@ def get_recommendations(table_body, db_covid, n_clicks):
             ignore_index=True
         )
 
-    recommendations = recommendations.sort_values('sim', ascending=False).drop(columns='sim').head(num_of_recs)
+    # Sort the recommendations based on similarity and filter any duplicated articles
+    recommendations = recommendations.sort_values('sim', ascending=False).drop_duplicates(['title', 'abstract']).head(NUM_OF_RECS)
 
     top_texts = get_text(recommendations.loc[:, 'title'], recommendations.loc[:, 'abstract'])
     recommendations['top_words'] = top_texts.apply(lambda s: top_tfidf(s, vectorizer))
@@ -306,6 +317,11 @@ def get_recommendations(table_body, db_covid, n_clicks):
     [Input('data-tabs', 'value')]
 )
 def render_data(tab):
+    """
+    Toggle which data to render on the RHS pane
+    :param tab: The tab on the left pane
+    :return: Style dictionaries setting the parameters for the desired data and hiding the others
+    """
     if tab == 'my-articles-tab':
         return (
             {'maxHeight': '80vh', 'overflowX': 'auto'},
@@ -335,6 +351,11 @@ def render_data(tab):
     [Input('database-switch', 'value')],
 )
 def toggle_database(db_covid):
+    """
+    Toggle which data set to work with (i.e. arXiv v.s. CORD-19)
+    :param db_covid: Boolean value – True means use CORD-19
+    :return:
+    """
     if db_covid:
         return [
             {'label': 'arXiv'},
@@ -353,9 +374,18 @@ def toggle_database(db_covid):
     [State('add-article-button', 'n_clicks')]
 )
 def render_nlp_dashboard(table_body, n_words, n_clicks):
+    """
+    Render the visualization of NLP data from the user-inputted articles
+    :param table_body: My Articles table body
+    :param n_words: The number of words to display on the graph
+    :param n_clicks: The number of times the add articles button has been clicked
+    :return:
+    """
+    # Return if the button has not been clicked (to prevent errors upon page startup)
     if n_clicks == 0:
         return
 
+    # Process the table body into a list
     articles = []
     for row in table_body:
         tds = row['props']['children']
@@ -364,6 +394,7 @@ def render_nlp_dashboard(table_body, n_words, n_clicks):
             'column-abstract': tds[1]['props']['children']
         })
 
+    # Get the top n_words words sorted by TF-IDF (greatest to least)
     articles = pd.DataFrame(articles)
     top_words = pd.DataFrame(
         top_n_words(get_text(articles['column-article-title'], articles['column-abstract']), arxiv_vectorizer, n_words)
