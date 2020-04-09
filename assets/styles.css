@@ -12,6 +12,26 @@ body {
     border-top: solid 2px #FE0000FF!important;
 }
 
+.rc-slider-track {
+  background-color: green;
+}
+
+.rc-slider-dot-active {
+  border: solid 2px green;
+}
+
+.rc-slider-handle {
+  border-color: green;
+}
+
+/*.rc.slider-handle:hover {
+  border-color: purple;
+}
+
+.rc.slider-handle-active:active {
+  border-color: yellow;
+}*/
+
 #main-content-div {
     margin-left: 30px;
     margin-right: 30px;
@@ -84,15 +104,27 @@ table {
     padding: 0px;
 }
 
+.top-word-badge {
+    margin-left: 5px;
+    margin-right: 5px;
+    margin-bottom: 5px;
+}
+
 #nlp-dashboard-row {
     background-color: white;
+    border-top: solid 2px #FE0000FF;
     padding-top: 1.6rem;
     height: 90vh;
 }
 
 #nlp-dashboard-bar {
-    height: 85%;
-    border: 2px solid blue;
+    /*height: 85%;*/
+    /*border: 5px solid red!important;*/
+    height: 100%;
+}
+
+#nlp-dashboard-bar-graph {
+    height: 100%
 }
 
 #top-n-words-slider {

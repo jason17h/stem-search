@@ -35,7 +35,7 @@ app.layout = html.Div(id='main-content-div', children=[
                         html.Br(),
 
                         html.Label('Abstract'),
-                        dbc.Textarea(id='input-abstract', placeholder='Enter abstract', value=''),
+                        dbc.Textarea(id='input-abstract', placeholder='Enter abstract', value='', style={'height': '200px'}),
                         html.Br(),
 
                         dbc.Button('Add article', id='add-article-button', n_clicks=0, className='mr-1', color='light'),
@@ -205,10 +205,12 @@ app.layout = html.Div(id='main-content-div', children=[
                     100: {'label': '100'},
                 }
             ),
-            html.Div(id='nlp-dashboard-bar')
         ]),
-        dbc.Col(width=8, children=[
-            'bye'
+        dbc.Col(id='nlp-dashboard-bar', width=8, children=[
+            html.Div(id='nlp-dashboard-bar-graph')
+            # dcc.Loading(style={'height': '100%!important'}, children=[
+            #     html.Div(id='nlp-dashboard-bar', style={'height': '100%', 'border': '2px red solid'}, children=[])
+            # ])
         ]),
     ]),
 
@@ -223,7 +225,8 @@ app.layout = html.Div(id='main-content-div', children=[
     [Input('add-article-button', 'n_clicks')],
     [State('input-article-title', 'value'),
      State('input-abstract', 'value'),
-     State('article-table-body', 'children')])
+     State('article-table-body', 'children')]
+)
 def add_row(n_clicks, article, abstract, table_body):
     # if n_clicks == 1:
     #     rows = [{'column-article-title': article, 'column-abstract': abstract}]
@@ -249,8 +252,6 @@ def get_recommendations(table_body, db_covid, n_clicks):
 
     articles = []
     for row in table_body:
-        print('ROW:')
-        print(row)
         tds = row['props']['children']
         articles.append({
             'column-article-title': tds[0]['props']['children'],
@@ -266,8 +267,6 @@ def get_recommendations(table_body, db_covid, n_clicks):
     for row in articles:
         title = row['column-article-title']
         abstract = row['column-abstract']
-        print('TITLE: {}'.format(title))
-        print('ABSTRACT: {}'.format(abstract))
         vec = vectorizer.transform([title * 3 + abstract])
         cluster = model.predict(vec)
 
@@ -277,16 +276,26 @@ def get_recommendations(table_body, db_covid, n_clicks):
             ignore_index=True
         )
 
-    recommendations = recommendations.rename(columns={
-        'title': 'column-recommended-article-title',
-        'authors': 'column-recommended-article-author',
-        'abstract': 'column-recommended-abstract'
-    }).sort_values('sim', ascending=False).drop(columns='sim').head(num_of_recs).to_dict('records')
+    recommendations = recommendations.sort_values('sim', ascending=False).drop(columns='sim').head(num_of_recs)
+
+    top_texts = get_text(recommendations.loc[:, 'title'], recommendations.loc[:, 'abstract'])
+    recommendations['top_words'] = top_texts.apply(lambda s: top_tfidf(s, vectorizer))
+
+    # recommendations = recommendations.rename(columns={
+    #     'title': 'column-recommended-article-title',
+    #     'authors': 'column-recommended-article-author',
+    #     'abstract': 'column-recommended-abstract'
+    # })
 
     return [
         html.Tr(children=[
-            html.Td(children=[value]) for key, value in r.items()
-        ]) for r in recommendations
+            html.Td(children=rec['title']),
+            html.Td(children=rec['authors']),
+            html.Td(children=[
+                html.Div([dbc.Badge(word, className='top-word-badge') for word in rec['top_words'].split(',')]),
+                html.Div(rec['abstract'])
+            ])
+        ]) for rec in recommendations.to_dict('records')
     ]
 
 
@@ -315,13 +324,6 @@ def render_data(tab):
             {'maxHeight': '80vh', 'overflowX': 'auto'})
 
 
-# @app.callback(
-#     [Input('select-country-dropdown', 'value')]
-# )
-# def control_covid_data(countries, ):
-#     pass
-
-
 @app.callback(
     [Output('database-switch', 'label'),
      Output('recommended-articles-arxiv-text', 'style'),
@@ -346,18 +348,16 @@ def toggle_database(db_covid):
 
 
 @app.callback(
-    Output('nlp-dashboard-bar', 'children'),
-    [Input('article-table-body', 'children')],
+    Output('nlp-dashboard-bar-graph', 'children'),
+    [Input('article-table-body', 'children'), Input('top-n-words-slider', 'value')],
     [State('add-article-button', 'n_clicks')]
 )
-def render_nlp_dashboard(table_body, n_clicks):
+def render_nlp_dashboard(table_body, n_words, n_clicks):
     if n_clicks == 0:
         return
 
     articles = []
     for row in table_body:
-        print('ROW:')
-        print(row)
         tds = row['props']['children']
         articles.append({
             'column-article-title': tds[0]['props']['children'],
@@ -366,20 +366,20 @@ def render_nlp_dashboard(table_body, n_clicks):
 
     articles = pd.DataFrame(articles)
     top_words = pd.DataFrame(
-        top_n_words(get_text(articles['column-article-title'], articles['column-abstract']), arxiv_vectorizer, 100)
-    ).rename(columns={0: 'word', 1: 'freq'}).sort_values('freq', ascending=True)
+        top_n_words(get_text(articles['column-article-title'], articles['column-abstract']), arxiv_vectorizer, n_words)
+    ).rename(columns={0: 'word', 1: 'tfidf'}).sort_values(by='tfidf', ascending=False)
 
     return dcc.Graph(
-        style={'height': '100%'},
+        style={'height': '100%', 'width': '100%'},
         figure=go.Figure(go.Bar(
-            y=top_words['word'],
-            x=top_words['freq'],
-            orientation='h',
-            marker={'color': 'red'},
+            x=top_words['word'],
+            y=top_words['tfidf'],
+            # orientation='h',
+            marker={'color': 'green'},
         )).update_layout(
             # title='NLP Dash',
-            xaxis={'title': 'Frequency'},
-            yaxis={'title': 'Word'},
+            xaxis={'title': 'Word'},
+            yaxis={'title': 'TF-IDF'},
         )
     )
 

@@ -64,10 +64,8 @@ def find_similar_articles(df: pd.DataFrame, model, vectorizer,
 
     # slice from [1:] since the first value will be the same value that was entered
     if np.isclose(similar_papers.iloc[0]['sim'], 1):
-        print('9')
         return similar_papers.iloc[1:].head(num_of_recs)
     else:
-        print('9.5')
         return similar_papers.head(num_of_recs)
 
 
@@ -78,9 +76,40 @@ df_current = pd.DataFrame(
 
 def top_n_words(s: typing.Union[pd.Series, typing.List[str]],
                 vec, n: int = None) -> typing.List[typing.Tuple[str, float]]:
+    analyzer = vec.build_analyzer()
+    processed_words = []
+    for text in s:
+        processed_words += analyzer(text)
+    processed_words = set(processed_words)
+
     bow = vec.transform(s)
-    sum_words = bow.sum(axis=0)
-    words = [(w, sum_words[0, i]) for w, i in vec.vocabulary_.items() if sum_words[0, i] != 0]
-    words = sorted(words, key=lambda x: x[1], reverse=True)
-    return words[:n]
+    words = bow.sum(axis=0)
+
+    tfidf = [
+        (w, words[0, vec.vocabulary_.get(w)])
+        for w in processed_words
+        if w in vec.vocabulary_ and words[0, vec.vocabulary_.get(w)] != 0
+    ]
+
+    tfidf = sorted(tfidf, key=lambda x: x[1], reverse=True)
+
+    return tfidf[:n]
+
+
+def top_tfidf(s: str, vec, min_tfidf: float = 0.25) -> str:
+    analyzer = vec.build_analyzer()
+    processed_words = set(analyzer(s))
+
+    bow = vec.transform([s])
+    words = bow.sum(axis=0)
+
+    tfidf = [
+        (w, words[0, vec.vocabulary_.get(w)])
+        for w in processed_words
+        if w in vec.vocabulary_ and words[0, vec.vocabulary_.get(w)] > min_tfidf
+    ]
+    tfidf = sorted(tfidf, key=lambda x: x[1], reverse=True)
+    top_words = [w for w, t in tfidf]
+
+    return ', '.join(top_words)
 
