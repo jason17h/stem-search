@@ -40,7 +40,7 @@ app.layout = html.Div(id='main-content-div', children=[
                     ])
                 ]),
 
-                dcc.Tab(label='Recommended articles', className='data-tab', value='recommended-articles-tab',
+                dcc.Tab(label='Recommended', className='data-tab', value='recommended-articles-tab',
                         children=[
                             html.Div(className='data-entry-div', children=[
                                 daq.ToggleSwitch(
@@ -86,44 +86,58 @@ app.layout = html.Div(id='main-content-div', children=[
                             ])
                         ]),
 
-                dcc.Tab(label='Live COVID-19 report', className='data-tab', value='live-covid-report-tab', children=[
+                dcc.Tab(label='My TF–IDF', className='data-tab', value='nlp-dashboard-tab', children=[
                     html.Div(className='data-entry-div', children=[
-                        html.Label('Countries'),
-                        dcc.Dropdown(
-                            id='select-country-dropdown',
-                            options=[{'label': 'All countries', 'value': 'ALL'}] + [
-                                {'label': row[1]['country'], 'value': row[0]}
-                                for row in df_current.loc[:, ['country']].sort_values('country').iterrows()
-                            ],
-                            value='ALL',
-                            multi=True,
+                        html.Label('Top words to display'),
+                        dcc.Slider(
+                            id='top-n-words-slider',
+                            min=1,
+                            max=100,
+                            value=25,
+                            marks={
+                                1: {'label': '1'},
+                                25: {'label': '25'},
+                                50: {'label': '50'},
+                                75: {'label': '75'},
+                                100: {'label': '100'},
+                            }
                         ),
-
-                        html.Label('X axis'),
-                        dcc.Dropdown(
-                            options=[
-                                {'label': col.capitalize(), 'value': col}
-                                for col in ['confirmed', 'country', 'critical', 'deaths', 'population', 'recovered']
-                            ],
-                            value='population'
-                        ),
-
-                        html.Label('Y axis'),
-                        dcc.Dropdown(
-                            options=[
-                                {'label': col.capitalize(), 'value': col}
-                                for col in ['confirmed', 'critical', 'deaths', 'population', 'recovered']
-                            ],
-                            value='confirmed'
-                        ),
-
-                        html.Label('Filter'),
-                        dcc.Dropdown(
-                            options=[
-                                {'label': 'Top N', 'value': 'topN'}
-                            ],
-                            value='confirmed'
-                        ),
+                        # html.Label('Countries'),
+                        # dcc.Dropdown(
+                        #     id='select-country-dropdown',
+                        #     options=[{'label': 'All countries', 'value': 'ALL'}] + [
+                        #         {'label': row[1]['country'], 'value': row[0]}
+                        #         for row in df_current.loc[:, ['country']].sort_values('country').iterrows()
+                        #     ],
+                        #     value='ALL',
+                        #     multi=True,
+                        # ),
+                        #
+                        # html.Label('X axis'),
+                        # dcc.Dropdown(
+                        #     options=[
+                        #         {'label': col.capitalize(), 'value': col}
+                        #         for col in ['confirmed', 'country', 'critical', 'deaths', 'population', 'recovered']
+                        #     ],
+                        #     value='population'
+                        # ),
+                        #
+                        # html.Label('Y axis'),
+                        # dcc.Dropdown(
+                        #     options=[
+                        #         {'label': col.capitalize(), 'value': col}
+                        #         for col in ['confirmed', 'critical', 'deaths', 'population', 'recovered']
+                        #     ],
+                        #     value='confirmed'
+                        # ),
+                        #
+                        # html.Label('Filter'),
+                        # dcc.Dropdown(
+                        #     options=[
+                        #         {'label': 'Top N', 'value': 'topN'}
+                        #     ],
+                        #     value='confirmed'
+                        # ),
                     ]),
                 ]),
             ]),
@@ -158,56 +172,35 @@ app.layout = html.Div(id='main-content-div', children=[
                     ]),
                 ]),
 
-                html.Div(id='live-covid-report-div', children=[
-                    dbc.CardHeader(className='data-display-header', children='Cases by country'),
-                    dbc.CardBody(className='data-display-body', children=[
-                        dcc.Graph(
-                            id='cases-graph',
-                            figure={
-                                'data': [{
-                                    'x': df_current['population'],#.head(100),
-                                    'y': df_current['confirmed'],#.head(100),
-                                    'text': df_current['country'],#.head(100),
-                                    'mode': 'markers',
-                                    'marker': {'color': '#FE0000FF'},
-                                }],
-                                'layout': {
-                                    'title': 'Cases',
-                                    'xaxis': {'title': 'Population', 'type': 'log'},
-                                    'yaxis': {'title': 'Confirmed Cases', 'type': 'log'},
-                                },
-                            },
-                            style={'height': '100%', 'width': '100%'},
-                        ),
-                    ]),
-                ]),
+                html.Div(id='nlp-dashboard-div'),
             ])
         ])
     ]),
 
 
-    dbc.Row(id='nlp-dashboard-row', justify='around', children=[
-        dbc.Col(width=4, children=[
-            html.Label('Top words to display'),
-            dcc.Slider(
-                id='top-n-words-slider',
-                min=1,
-                max=100,
-                value=25,
-                marks={
-                    1: {'label': '1'},
-                    25: {'label': '25'},
-                    50: {'label': '50'},
-                    75: {'label': '75'},
-                    100: {'label': '100'},
-                }
+    dbc.Row(id='covid-report-row', justify='around', children=[
+        dbc.Col(id='covid-report-plot', width=8, children=[
+            dcc.Graph(
+                id='cases-graph',
+                figure={
+                    'data': [{
+                        'x': df_current['population'],#.head(100),
+                        'y': df_current['confirmed'],#.head(100),
+                        'text': df_current['country'],#.head(100),
+                        'mode': 'markers',
+                        'marker': {'color': '#6DAC4FFF'},
+                    }],
+                    'layout': {
+                        'title': 'Cases',
+                        'xaxis': {'title': 'Population', 'type': 'log'},
+                        'yaxis': {'title': 'Confirmed Cases', 'type': 'log'},
+                    },
+                },
+                style={'height': '100%', 'width': '100%'},
             ),
         ]),
-        dbc.Col(id='nlp-dashboard-bar', width=8, children=[
-            html.Div(id='nlp-dashboard-bar-graph')
-            # dcc.Loading(style={'height': '100%!important'}, children=[
-            #     html.Div(id='nlp-dashboard-bar', style={'height': '100%', 'border': '2px red solid'}, children=[])
-            # ])
+        dbc.Col(width=4, children=[
+
         ]),
     ]),
 
@@ -303,7 +296,10 @@ def get_recommendations(table_body, db_covid, n_clicks):
             html.Td(children=rec['title']),
             html.Td(children=rec['authors']),
             html.Td(children=[
-                html.Div([dbc.Badge(word, className='top-word-badge') for word in rec['top_words'].split(',')]),
+                html.Div([
+                    dbc.Badge(word, className='top-word-badge', color='success')
+                    for word in rec['top_words'].split(',')
+                ]),
                 html.Div(rec['abstract'])
             ])
         ]) for rec in recommendations.to_dict('records')
@@ -313,7 +309,7 @@ def get_recommendations(table_body, db_covid, n_clicks):
 @app.callback(
     [Output('article-table-div', 'style'),
      Output('recommendations-table-div', 'style'),
-     Output('live-covid-report-div', 'style')],
+     Output('nlp-dashboard-div', 'style')],
     [Input('data-tabs', 'value')]
 )
 def render_data(tab):
@@ -333,7 +329,7 @@ def render_data(tab):
             {'visibility': 'hidden', 'height': '0px', 'overflowX': 'hidden'},
             {'maxHeight': '80vh', 'overflowX': 'auto'},
             {'visibility': 'hidden', 'height': '0px', 'overflowX': 'hidden'})
-    elif tab == 'live-covid-report-tab':
+    elif tab == 'nlp-dashboard-tab':
         return (
             {'visibility': 'hidden', 'height': '0px', 'overflowX': 'hidden'},
             {'visibility': 'hidden', 'height': '0px', 'overflowX': 'hidden'},
@@ -369,7 +365,7 @@ def toggle_database(db_covid):
 
 
 @app.callback(
-    Output('nlp-dashboard-bar-graph', 'children'),
+    Output('nlp-dashboard-div', 'children'),
     [Input('article-table-body', 'children'), Input('top-n-words-slider', 'value')],
     [State('add-article-button', 'n_clicks')]
 )
@@ -408,7 +404,7 @@ def render_nlp_dashboard(table_body, n_words, n_clicks):
             # orientation='h',
             marker={'color': 'green'},
         )).update_layout(
-            # title='NLP Dash',
+            title={'text': 'TF–IDF of my articles'},
             xaxis={'title': 'Word'},
             yaxis={'title': 'TF-IDF'},
         )

@@ -109,21 +109,26 @@ table {
     margin-bottom: 5px;
 }
 
-#nlp-dashboard-row {
+#covid-report-row {
     background-color: white;
     border-top: solid 2px #FE0000FF;
     padding-top: 1.6rem;
     height: 90vh;
 }
 
-#nlp-dashboard-bar {
+#covid-report-plot {
     /*height: 85%;*/
     /*border: 5px solid red!important;*/
     height: 100%;
 }
 
-#nlp-dashboard-bar-graph {
-    height: 100%
+/*#nlp-dashboard-bar-graph {
+    border: 2px red solid;
+    height: 100%;
+}*/
+
+#nlp-dashboard-div {
+    height: 100%;
 }
 
 #top-n-words-slider {
