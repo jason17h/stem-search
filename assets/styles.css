@@ -1,6 +1,7 @@
 body {
     height: 100vh;
     background-color: #EFEFE8FF;
+    font-family: 'Oxygen';
 }
 
 .tab {
@@ -31,6 +32,32 @@ body {
 .rc.slider-handle-active:active {
   border-color: yellow;
 }*/
+
+#stemsearch-logo {
+    font-family: 'Playfair Display SC';
+    font-weight: 900;
+    text-shadow:
+		-1px -1px 0 #000,
+		1px -1px 0 #000,
+		-1px 1px 0 #000,
+		1px 1px 0 #000;
+}
+
+#logo-subtitle {
+    font-family: 'Amita'
+}
+
+#page-header-row {
+    margin-bottom: 20px;
+}
+
+#page-header-col {
+    background-color: #6DAC4FFF;
+    text-align: center;
+    color: #EFEFE8FF;
+    margin-top: 10px;
+    margin-bottom: 0px;
+}
 
 #main-content-div {
     margin-left: 30px;
@@ -122,16 +149,16 @@ table {
     height: 100%;
 }
 
-#select-covid-report-type-div {
-    margin-top: 20%;
+#select-map-unit-div {
+    background-color: white;
+    margin-bottom: 0px;
+    padding-top: 20px;
 }
 
-/*
+
 #covid-report-settings {
-    border: 3px blue solid;
-    height: 80%;
     margin-top: 20%;
-}*/
+}
 
 /*#nlp-dashboard-bar-graph {
     border: 2px red solid;

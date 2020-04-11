@@ -16,11 +16,25 @@ import pandas as pd
 import numpy as np
 
 
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+app = dash.Dash(__name__, external_stylesheets=[
+    dbc.themes.BOOTSTRAP,
+    'https://fonts.googleapis.com/css?family=Jacques+Francois+Shadow',
+    'https://fonts.googleapis.com/css?family=Amita',
+    'https://fonts.googleapis.com/css?family=Josefin+Sans',
+    'https://fonts.googleapis.com/css?family=Alegreya+Sans',
+    'https://fonts.googleapis.com/css?family=Darker+Grotesque',
+    'https://fonts.googleapis.com/css?family=Montserrat',
+    'https://fonts.googleapis.com/css?family=Oxygen',
+    'https://fonts.googleapis.com/css?family=Playfair+Display+SC',
+])
 
 app.layout = html.Div(id='main-content-div', children=[
-    html.H1(children='STEMSearch'),
-    html.H2(children='Research made easy.'),
+    dbc.Row(id='page-header-row', justify='around', children=[
+        dbc.Col(id='page-header-col', children=[
+            html.H1(id='stemsearch-logo', children='STEMSearch'),
+            html.H2(id='logo-subtitle', children='Research made easy.'),
+        ], width=5),
+    ]),
 
     dbc.Row(justify='between', children=[
         dbc.Col(className='data-col', id='data-entry-col', width=4, children=[
@@ -171,7 +185,7 @@ app.layout = html.Div(id='main-content-div', children=[
                             id='select-x-axis-unit',
                             options=[
                                 {'label': 'Population', 'value': 'population'},
-                                {'label': 'Cases', 'value': 'confirmed'},
+                                {'label': 'Confirmed', 'value': 'confirmed'},
                             ],
                             value='population'
                         ),
@@ -181,6 +195,8 @@ app.layout = html.Div(id='main-content-div', children=[
                                 {'label': 'Logarithmic', 'value': 'log'},
                                 {'label': 'Linear', 'value': 'linear'},
                             ],
+                            inputStyle={'marginRight': '5px'},
+                            labelStyle={'marginRight': '50px'},
                             value='log'
                         ),
 
@@ -191,7 +207,7 @@ app.layout = html.Div(id='main-content-div', children=[
                             id='select-y-axis-unit',
                             options=[
                                 {'label': 'Deaths', 'value': 'deaths'},
-                                {'label': 'Cases', 'value': 'confirmed'},
+                                {'label': 'Confirmed', 'value': 'confirmed'},
                             ],
                             value='confirmed'
                         ),
@@ -201,6 +217,8 @@ app.layout = html.Div(id='main-content-div', children=[
                                 {'label': 'Logarithmic', 'value': 'log'},
                                 {'label': 'Linear', 'value': 'linear'},
                             ],
+                            inputStyle={'marginRight': '5px'},
+                            labelStyle={'marginRight': '50px'},
                             value='log'
                         ),
                     ])
@@ -208,23 +226,41 @@ app.layout = html.Div(id='main-content-div', children=[
             ]),
         ]),
         dcc.Tab(label='Map', children=[
-            dbc.Row(className='covid-report-row', justify='around', children=[
-                dbc.Col(className='covid-report-plot', width=8, children=[
-                    # dcc.Graph(
-                    #     figure=go.Figure(go.Scattergeo(
-                    #         lon=df_current['longitude'],
-                    #         lat=df_current['latitude'],
-                    #         visible=True,
-                    #         marker={
-                    #             # 'size': df_current['confirmed'] / 1000,
-                    #         }
-                    #     )),
-                    #     style={'height': '100%', 'width': '100%'}
-                    # )
-                ]),
+            dbc.Row(id='select-map-unit-div', justify='around', children=[
                 dbc.Col(width=4, children=[
-
+                    html.Label('Select figure to measure'),
+                    dcc.Dropdown(
+                        id='select-map-unit',
+                        options=[
+                            {'label': 'Confirmed', 'value': 'confirmed'},
+                            {'label': 'Deaths', 'value': 'deaths'},
+                        ],
+                        value='confirmed'
+                    ),
                 ]),
+            ]),
+            dbc.Row(className='covid-report-row', justify='around', children=[
+                dbc.Col(id='covid-bubble-map', className='covid-report-plot', width=12, children=[
+                    dcc.Graph(
+                        figure=go.Figure(go.Scattergeo(
+                            lon=df_current['longitude'],
+                            lat=df_current['latitude'],
+                            text='Country: ' + df_current['country']
+                                 + '<br>Confirmed: ' + df_current['confirmed'].astype(str)
+                                 + '<br>Deaths: ' + df_current['deaths'].astype(str),
+                            visible=True,
+                            marker={
+                                'size': list(df_current['confirmed'].values),
+                                'sizeref': 2. * df_current['confirmed'].max() / (20.**2),
+                                'color': 'green',
+                            }
+                        )),
+                        style={'height': '100%', 'width': '100%'}
+                    )
+                ]),
+                # dbc.Col(width=4, children=[
+                #
+                # ]),
             ])
         ]),
     ])
@@ -457,6 +493,29 @@ def update_scatter_plot(x_unit, x_scale, y_unit, y_scale):
             'yaxis': {'title': y_unit.capitalize(), 'type': y_scale},
         },
     }
+
+
+@app.callback(
+    Output('covid-bubble-map', 'children'),
+    [Input('select-map-unit', 'value')]
+)
+def update_map(unit):
+    return dcc.Graph(
+        figure=go.Figure(go.Scattergeo(
+            lon=df_current['longitude'],
+            lat=df_current['latitude'],
+            text='Country: ' + df_current['country']
+                 + '<br>Confirmed: ' + df_current['confirmed'].astype(str)
+                 + '<br>Deaths: ' + df_current['deaths'].astype(str),
+            visible=True,
+            marker={
+                'size': list(df_current[unit].values),
+                'sizeref': 2. * df_current[unit].max() / (20. ** 2),
+                'color': 'green',
+            }
+        )),
+        style={'height': '100%', 'width': '100%'}
+    )
 
 
 if __name__ == '__main__':
