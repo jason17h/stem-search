@@ -102,42 +102,6 @@ app.layout = html.Div(id='main-content-div', children=[
                                 100: {'label': '100'},
                             }
                         ),
-                        # html.Label('Countries'),
-                        # dcc.Dropdown(
-                        #     id='select-country-dropdown',
-                        #     options=[{'label': 'All countries', 'value': 'ALL'}] + [
-                        #         {'label': row[1]['country'], 'value': row[0]}
-                        #         for row in df_current.loc[:, ['country']].sort_values('country').iterrows()
-                        #     ],
-                        #     value='ALL',
-                        #     multi=True,
-                        # ),
-                        #
-                        # html.Label('X axis'),
-                        # dcc.Dropdown(
-                        #     options=[
-                        #         {'label': col.capitalize(), 'value': col}
-                        #         for col in ['confirmed', 'country', 'critical', 'deaths', 'population', 'recovered']
-                        #     ],
-                        #     value='population'
-                        # ),
-                        #
-                        # html.Label('Y axis'),
-                        # dcc.Dropdown(
-                        #     options=[
-                        #         {'label': col.capitalize(), 'value': col}
-                        #         for col in ['confirmed', 'critical', 'deaths', 'population', 'recovered']
-                        #     ],
-                        #     value='confirmed'
-                        # ),
-                        #
-                        # html.Label('Filter'),
-                        # dcc.Dropdown(
-                        #     options=[
-                        #         {'label': 'Top N', 'value': 'topN'}
-                        #     ],
-                        #     value='confirmed'
-                        # ),
                     ]),
                 ]),
             ]),
@@ -177,33 +141,93 @@ app.layout = html.Div(id='main-content-div', children=[
         ])
     ]),
 
+    dcc.Tabs(children=[
+        dcc.Tab(label='Scatter', children=[
+            dbc.Row(className='covid-report-row', justify='around', children=[
+                dbc.Col(className='covid-report-plot', width=8, children=[
+                    dcc.Graph(
+                        id='cases-plot',
+                        figure={
+                            'data': [{
+                                'x': df_current['population'],#.head(100),
+                                'y': df_current['confirmed'],#.head(100),
+                                'text': df_current['country'],#.head(100),
+                                'mode': 'markers',
+                                'marker': {'color': 'green'},
+                            }],
+                            'layout': {
+                                'title': 'Cases',
+                                'xaxis': {'title': 'Population', 'type': 'log'},
+                                'yaxis': {'title': 'Confirmed Cases', 'type': 'log'},
+                            },
+                        },
+                        style={'height': '100%', 'width': '100%'},
+                    ),
+                ]),
+                dbc.Col(width=4, children=[
+                    html.Div(id='covid-report-settings', children=[
+                        html.Label('X axis'),
+                        dcc.Dropdown(
+                            id='select-x-axis-unit',
+                            options=[
+                                {'label': 'Population', 'value': 'population'},
+                                {'label': 'Cases', 'value': 'confirmed'},
+                            ],
+                            value='population'
+                        ),
+                        dcc.RadioItems(
+                            id='select-x-axis-scale',
+                            options=[
+                                {'label': 'Logarithmic', 'value': 'log'},
+                                {'label': 'Linear', 'value': 'linear'},
+                            ],
+                            value='log'
+                        ),
 
-    dbc.Row(id='covid-report-row', justify='around', children=[
-        dbc.Col(id='covid-report-plot', width=8, children=[
-            dcc.Graph(
-                id='cases-graph',
-                figure={
-                    'data': [{
-                        'x': df_current['population'],#.head(100),
-                        'y': df_current['confirmed'],#.head(100),
-                        'text': df_current['country'],#.head(100),
-                        'mode': 'markers',
-                        'marker': {'color': '#6DAC4FFF'},
-                    }],
-                    'layout': {
-                        'title': 'Cases',
-                        'xaxis': {'title': 'Population', 'type': 'log'},
-                        'yaxis': {'title': 'Confirmed Cases', 'type': 'log'},
-                    },
-                },
-                style={'height': '100%', 'width': '100%'},
-            ),
+                        html.Br(),
+
+                        html.Label('Y axis'),
+                        dcc.Dropdown(
+                            id='select-y-axis-unit',
+                            options=[
+                                {'label': 'Deaths', 'value': 'deaths'},
+                                {'label': 'Cases', 'value': 'confirmed'},
+                            ],
+                            value='confirmed'
+                        ),
+                        dcc.RadioItems(
+                            id='select-y-axis-scale',
+                            options=[
+                                {'label': 'Logarithmic', 'value': 'log'},
+                                {'label': 'Linear', 'value': 'linear'},
+                            ],
+                            value='log'
+                        ),
+                    ])
+                ]),
+            ]),
         ]),
-        dbc.Col(width=4, children=[
+        dcc.Tab(label='Map', children=[
+            dbc.Row(className='covid-report-row', justify='around', children=[
+                dbc.Col(className='covid-report-plot', width=8, children=[
+                    # dcc.Graph(
+                    #     figure=go.Figure(go.Scattergeo(
+                    #         lon=df_current['longitude'],
+                    #         lat=df_current['latitude'],
+                    #         visible=True,
+                    #         marker={
+                    #             # 'size': df_current['confirmed'] / 1000,
+                    #         }
+                    #     )),
+                    #     style={'height': '100%', 'width': '100%'}
+                    # )
+                ]),
+                dbc.Col(width=4, children=[
 
+                ]),
+            ])
         ]),
-    ]),
-
+    ])
 
 ])
 
@@ -409,6 +433,30 @@ def render_nlp_dashboard(table_body, n_words, n_clicks):
             yaxis={'title': 'TF-IDF'},
         )
     )
+
+
+@app.callback(
+    Output('cases-plot', 'figure'),
+    [Input('select-x-axis-unit', 'value'),
+     Input('select-x-axis-scale', 'value'),
+     Input('select-y-axis-unit', 'value'),
+     Input('select-y-axis-scale', 'value')]
+)
+def update_scatter_plot(x_unit, x_scale, y_unit, y_scale):
+    return {
+        'data': [{
+            'x': df_current[x_unit],  # .head(100),
+            'y': df_current[y_unit],  # .head(100),
+            'text': df_current['country'],  # .head(100),
+            'mode': 'markers',
+            'marker': {'color': 'green'},
+        }],
+        'layout': {
+            'title': 'Cases',
+            'xaxis': {'title': x_unit.capitalize(), 'type': x_scale},
+            'yaxis': {'title': y_unit.capitalize(), 'type': y_scale},
+        },
+    }
 
 
 if __name__ == '__main__':

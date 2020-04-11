@@ -51,12 +51,14 @@ def process_current_covid_data(data: typing.List[dict]) -> dict:
         tmp = country.pop('today')
         today = {'deaths_today': tmp['deaths'], 'confirmed_today': tmp['confirmed']}
 
-        country.pop('coordinates')  # we don't care about the coordinates
+        coords = country.pop('coordinates')
 
         # Update the master dictionary with the information we want
         country.update(info)
         country.update(rates)
         country.update(today)
+        country.update(coords)
+        
         master[code] = country
 
     return master

@@ -109,18 +109,29 @@ table {
     margin-bottom: 5px;
 }
 
-#covid-report-row {
+.covid-report-row {
     background-color: white;
-    border-top: solid 2px #FE0000FF;
+    /*border-top: solid 2px #FE0000FF;*/
     padding-top: 1.6rem;
-    height: 90vh;
+    height: 87vh;
 }
 
-#covid-report-plot {
+.covid-report-plot {
     /*height: 85%;*/
     /*border: 5px solid red!important;*/
     height: 100%;
 }
+
+#select-covid-report-type-div {
+    margin-top: 20%;
+}
+
+/*
+#covid-report-settings {
+    border: 3px blue solid;
+    height: 80%;
+    margin-top: 20%;
+}*/
 
 /*#nlp-dashboard-bar-graph {
     border: 2px red solid;
