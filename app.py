@@ -28,243 +28,248 @@ app = dash.Dash(__name__, external_stylesheets=[
     'https://fonts.googleapis.com/css?family=Playfair+Display+SC',
 ])
 
-app.layout = html.Div(id='main-content-div', children=[
+app.layout = html.Div(children=[
     dbc.Row(id='page-header-row', justify='around', children=[
         dbc.Col(id='page-header-col', children=[
-            html.H1(id='stemsearch-logo', children='STEMSearch'),
-            html.H2(id='logo-subtitle', children='Research made easy.'),
-        ], width=5),
+            html.H1(id='stemsearch-logo', children=[
+                'STEMSearch • ',
+                html.Span(id='research-made-easy', children=['Research made easy.']),
+            ]),
+            # html.Img(src=app.get_asset_url('github-green.png'), style={'height': '2rem'}),
+            # html.H4(id='logo-subtitle', children='Created by Jason Huang'),
+        ], width=12),
     ]),
 
-    dbc.Row(justify='between', children=[
-        dbc.Col(className='data-col', id='data-entry-col', width=4, children=[
-            dcc.Tabs(id='data-tabs', value='my-articles-tab', children=[
-                dcc.Tab(label='My articles', value='my-articles-tab', className='data-tab', children=[
-                    html.Div(className='data-entry-div', children=[
-                        html.Label('Article title'),
-                        dbc.Input(id='input-article-title', placeholder='Enter article title', type='text', value=''),
-                        html.Br(),
+    html.Div(id='main-content-div', children=[
+        dbc.Row(justify='between', children=[
+            dbc.Col(className='data-col', id='data-entry-col', width=4, children=[
+                dcc.Tabs(id='data-tabs', value='my-articles-tab', children=[
+                    dcc.Tab(label='My articles', value='my-articles-tab', className='data-tab', children=[
+                        html.Div(className='data-entry-div', children=[
+                            html.Label('Article title'),
+                            dbc.Input(id='input-article-title', placeholder='Enter article title', type='text', value=''),
+                            html.Br(),
 
-                        html.Label('Abstract'),
-                        dbc.Textarea(id='input-abstract', placeholder='Enter abstract', value='', style={'height': '200px'}),
-                        html.Br(),
+                            html.Label('Abstract'),
+                            dbc.Textarea(id='input-abstract', placeholder='Enter abstract', value='', style={'height': '200px'}),
+                            html.Br(),
 
-                        dbc.Button('Add article', id='add-article-button', n_clicks=0, className='mr-1', color='light'),
-                        html.Br(),
-                    ])
-                ]),
+                            dbc.Button('Add article', id='add-article-button', n_clicks=0, className='mr-1', color='light'),
+                            html.Br(),
+                        ])
+                    ]),
 
-                dcc.Tab(label='Recommended', className='data-tab', value='recommended-articles-tab',
-                        children=[
-                            html.Div(className='data-entry-div', children=[
-                                daq.ToggleSwitch(
-                                    id='database-switch',
-                                    # color='#FE0000FF',
-                                    label=[{'label': 'arXiv', 'style': {'color': '#FE0000FF'}},
-                                           {'label': 'CORD-19'}]
-                                ),
-                                html.Br(),
-                                html.P(id='recommended-articles-arxiv-text', style={'color': '#0A5E2AFF'}, children="""
-                                    Based on the journals you've referenced so far, here is a list of similar articles
-                                    that we think might help you in furthering your research. Feel free to browse the
-                                    list, read through the abstracts to see if they fit your research topic, and search
-                                    them up if you think they'll be useful! These articles can be found in the arXiv
-                                    open-access data archive.
-                                """),
-                                html.Br(),
-                                dbc.Button(
-                                    id='arxiv-link',
-                                    color='danger',
-                                    children='Go to arXiv',
-                                    href='https://arxiv.org/',
-                                    target='_blank',
-                                    style={'backgroundColor': '#FE0000FF', 'borderColor': '#FE0000FF'}
-                                ),
-                                html.Br(),
-                                html.Br(),
-                                html.P(
-                                    id='recommended-articles-cord-19-text',
-                                    children="""
-                                    If your research is specific to the COVID-19 pandemic, you may find it useful
-                                    """,
-                                    style={'borderTop': '#FE0000FF'}
-                                ),
-                                html.Br(),
-                                dbc.Button(
-                                    id='cord-19-link',
-                                    color='light',
-                                    children='Go to CORD-19',
-                                    href='https://pages.semanticscholar.org/coronavirus-research',
-                                    target='_blank'
-                                ),
-                            ])
+                    dcc.Tab(label='Recommended', className='data-tab', value='recommended-articles-tab',
+                            children=[
+                                html.Div(className='data-entry-div', children=[
+                                    daq.ToggleSwitch(
+                                        id='database-switch',
+                                        # color='#FE0000FF',
+                                        label=[{'label': 'arXiv', 'style': {'color': '#FE0000FF'}},
+                                               {'label': 'CORD-19'}]
+                                    ),
+                                    html.Br(),
+                                    html.P(id='recommended-articles-arxiv-text', style={'color': '#0A5E2AFF'}, children="""
+                                        Based on the journals you've referenced so far, here is a list of similar articles
+                                        that we think might help you in furthering your research. Feel free to browse the
+                                        list, read through the abstracts to see if they fit your research topic, and search
+                                        them up if you think they'll be useful! These articles can be found in the arXiv
+                                        open-access data archive.
+                                    """),
+                                    html.Br(),
+                                    dbc.Button(
+                                        id='arxiv-link',
+                                        color='danger',
+                                        children='Go to arXiv',
+                                        href='https://arxiv.org/',
+                                        target='_blank',
+                                        style={'backgroundColor': '#FE0000FF', 'borderColor': '#FE0000FF'}
+                                    ),
+                                    html.Br(),
+                                    html.Br(),
+                                    html.P(
+                                        id='recommended-articles-cord-19-text',
+                                        children="""
+                                        If your research is specific to the COVID-19 pandemic, you may find it useful
+                                        """,
+                                        style={'borderTop': '#FE0000FF'}
+                                    ),
+                                    html.Br(),
+                                    dbc.Button(
+                                        id='cord-19-link',
+                                        color='light',
+                                        children='Go to CORD-19',
+                                        href='https://pages.semanticscholar.org/coronavirus-research',
+                                        target='_blank'
+                                    ),
+                                ])
+                            ]),
+
+                    dcc.Tab(label='My TF–IDF', className='data-tab', value='nlp-dashboard-tab', children=[
+                        html.Div(className='data-entry-div', children=[
+                            html.Label('Top words to display'),
+                            dcc.Slider(
+                                id='top-n-words-slider',
+                                min=1,
+                                max=100,
+                                value=25,
+                                marks={
+                                    1: {'label': '1'},
+                                    25: {'label': '25'},
+                                    50: {'label': '50'},
+                                    75: {'label': '75'},
+                                    100: {'label': '100'},
+                                }
+                            ),
                         ]),
-
-                dcc.Tab(label='My TF–IDF', className='data-tab', value='nlp-dashboard-tab', children=[
-                    html.Div(className='data-entry-div', children=[
-                        html.Label('Top words to display'),
-                        dcc.Slider(
-                            id='top-n-words-slider',
-                            min=1,
-                            max=100,
-                            value=25,
-                            marks={
-                                1: {'label': '1'},
-                                25: {'label': '25'},
-                                50: {'label': '50'},
-                                75: {'label': '75'},
-                                100: {'label': '100'},
-                            }
-                        ),
                     ]),
                 ]),
             ]),
+
+
+            dbc.Col(className='data-col', width=7, children=[
+                dbc.Card(id='data-display-card', children=[
+                    html.Div(id='article-table-div', children=[
+                        dbc.CardHeader(className='data-display-header', children='My articles'),
+                        dbc.CardBody(className='data-display-body', children=[
+                            dbc.Table(id='article-table', children=[
+                                html.Thead(children=[
+                                    html.Tr(children=[html.Th('Article title'), html.Th('Abstract')])
+                                ]),
+                                html.Tbody(id='article-table-body')
+                            ]),
+                        ]),
+                    ]),
+
+                    html.Div(id='recommendations-table-div', children=[
+                        dcc.Loading(color='#FE0000FF', children=[
+                            dbc.CardHeader(className='data-display-header', children='Recommended articles'),
+                            dbc.CardBody(className='data-display-body', children=[
+                                dbc.Table(children=[
+                                    html.Thead(children=[
+                                        html.Tr(children=[html.Th('Article title'), html.Th('Authors'), html.Th('Abstract')])
+                                    ]),
+                                    html.Tbody(id='recommendations-table-body')
+                                ]),
+                            ]),
+                        ]),
+                    ]),
+
+                    html.Div(id='nlp-dashboard-div'),
+                ])
+            ])
         ]),
 
-
-        dbc.Col(className='data-col', width=7, children=[
-            dbc.Card(id='data-display-card', children=[
-                html.Div(id='article-table-div', children=[
-                    dbc.CardHeader(className='data-display-header', children='My articles'),
-                    dbc.CardBody(className='data-display-body', children=[
-                        dbc.Table(id='article-table', children=[
-                            html.Thead(children=[
-                                html.Tr(children=[html.Th('Article title'), html.Th('Abstract')])
-                            ]),
-                            html.Tbody(id='article-table-body')
-                        ]),
-                    ]),
-                ]),
-
-                html.Div(id='recommendations-table-div', children=[
-                    dcc.Loading(color='#FE0000FF', children=[
-                        dbc.CardHeader(className='data-display-header', children='Recommended articles'),
-                        dbc.CardBody(className='data-display-body', children=[
-                            dbc.Table(children=[
-                                html.Thead(children=[
-                                    html.Tr(children=[html.Th('Article title'), html.Th('Authors'), html.Th('Abstract')])
-                                ]),
-                                html.Tbody(id='recommendations-table-body')
-                            ]),
-                        ]),
-                    ]),
-                ]),
-
-                html.Div(id='nlp-dashboard-div'),
-            ])
-        ])
-    ]),
-
-    dcc.Tabs(children=[
-        dcc.Tab(label='Scatter', children=[
-            dbc.Row(className='covid-report-row', justify='around', children=[
-                dbc.Col(className='covid-report-plot', width=8, children=[
-                    dcc.Graph(
-                        id='cases-plot',
-                        figure={
-                            'data': [{
-                                'x': df_current['population'],#.head(100),
-                                'y': df_current['confirmed'],#.head(100),
-                                'text': df_current['country'],#.head(100),
-                                'mode': 'markers',
-                                'marker': {'color': 'green'},
-                            }],
-                            'layout': {
-                                'title': 'Cases',
-                                'xaxis': {'title': 'Population', 'type': 'log'},
-                                'yaxis': {'title': 'Confirmed Cases', 'type': 'log'},
+        dcc.Tabs(children=[
+            dcc.Tab(label='Scatter', children=[
+                dbc.Row(className='covid-report-row', justify='around', children=[
+                    dbc.Col(className='covid-report-plot', width=8, children=[
+                        dcc.Graph(
+                            id='cases-plot',
+                            figure={
+                                'data': [{
+                                    'x': df_current['population'],#.head(100),
+                                    'y': df_current['confirmed'],#.head(100),
+                                    'text': df_current['country'],#.head(100),
+                                    'mode': 'markers',
+                                    'marker': {'color': 'green'},
+                                }],
+                                'layout': {
+                                    'title': 'Cases',
+                                    'xaxis': {'title': 'Population', 'type': 'log'},
+                                    'yaxis': {'title': 'Confirmed Cases', 'type': 'log'},
+                                },
                             },
-                        },
-                        style={'height': '100%', 'width': '100%'},
-                    ),
+                            style={'height': '100%', 'width': '100%'},
+                        ),
+                    ]),
+                    dbc.Col(width=4, children=[
+                        html.Div(id='covid-report-settings', children=[
+                            html.Label('X axis'),
+                            dcc.Dropdown(
+                                id='select-x-axis-unit',
+                                options=[
+                                    {'label': 'Population', 'value': 'population'},
+                                    {'label': 'Confirmed', 'value': 'confirmed'},
+                                ],
+                                value='population'
+                            ),
+                            dcc.RadioItems(
+                                id='select-x-axis-scale',
+                                options=[
+                                    {'label': 'Logarithmic', 'value': 'log'},
+                                    {'label': 'Linear', 'value': 'linear'},
+                                ],
+                                inputStyle={'marginRight': '5px'},
+                                labelStyle={'marginRight': '50px'},
+                                value='log'
+                            ),
+
+                            html.Br(),
+
+                            html.Label('Y axis'),
+                            dcc.Dropdown(
+                                id='select-y-axis-unit',
+                                options=[
+                                    {'label': 'Deaths', 'value': 'deaths'},
+                                    {'label': 'Confirmed', 'value': 'confirmed'},
+                                ],
+                                value='confirmed'
+                            ),
+                            dcc.RadioItems(
+                                id='select-y-axis-scale',
+                                options=[
+                                    {'label': 'Logarithmic', 'value': 'log'},
+                                    {'label': 'Linear', 'value': 'linear'},
+                                ],
+                                inputStyle={'marginRight': '5px'},
+                                labelStyle={'marginRight': '50px'},
+                                value='log'
+                            ),
+                        ])
+                    ]),
                 ]),
-                dbc.Col(width=4, children=[
-                    html.Div(id='covid-report-settings', children=[
-                        html.Label('X axis'),
+            ]),
+            dcc.Tab(label='Map', children=[
+                dbc.Row(id='select-map-unit-div', justify='around', children=[
+                    dbc.Col(width=4, children=[
+                        html.Label('Select figure to measure'),
                         dcc.Dropdown(
-                            id='select-x-axis-unit',
+                            id='select-map-unit',
                             options=[
-                                {'label': 'Population', 'value': 'population'},
                                 {'label': 'Confirmed', 'value': 'confirmed'},
-                            ],
-                            value='population'
-                        ),
-                        dcc.RadioItems(
-                            id='select-x-axis-scale',
-                            options=[
-                                {'label': 'Logarithmic', 'value': 'log'},
-                                {'label': 'Linear', 'value': 'linear'},
-                            ],
-                            inputStyle={'marginRight': '5px'},
-                            labelStyle={'marginRight': '50px'},
-                            value='log'
-                        ),
-
-                        html.Br(),
-
-                        html.Label('Y axis'),
-                        dcc.Dropdown(
-                            id='select-y-axis-unit',
-                            options=[
                                 {'label': 'Deaths', 'value': 'deaths'},
-                                {'label': 'Confirmed', 'value': 'confirmed'},
                             ],
                             value='confirmed'
                         ),
-                        dcc.RadioItems(
-                            id='select-y-axis-scale',
-                            options=[
-                                {'label': 'Logarithmic', 'value': 'log'},
-                                {'label': 'Linear', 'value': 'linear'},
-                            ],
-                            inputStyle={'marginRight': '5px'},
-                            labelStyle={'marginRight': '50px'},
-                            value='log'
-                        ),
-                    ])
+                    ]),
                 ]),
+                dbc.Row(className='covid-report-row', justify='around', children=[
+                    dbc.Col(id='covid-bubble-map', className='covid-report-plot', width=12, children=[
+                        dcc.Graph(
+                            figure=go.Figure(go.Scattergeo(
+                                lon=df_current['longitude'],
+                                lat=df_current['latitude'],
+                                text='Country: ' + df_current['country']
+                                     + '<br>Confirmed: ' + df_current['confirmed'].astype(str)
+                                     + '<br>Deaths: ' + df_current['deaths'].astype(str),
+                                visible=True,
+                                marker={
+                                    'size': list(df_current['confirmed'].values),
+                                    'sizeref': 2. * df_current['confirmed'].max() / (20.**2),
+                                    'color': 'green',
+                                }
+                            )),
+                            style={'height': '100%', 'width': '100%'}
+                        )
+                    ]),
+                    # dbc.Col(width=4, children=[
+                    #
+                    # ]),
+                ])
             ]),
-        ]),
-        dcc.Tab(label='Map', children=[
-            dbc.Row(id='select-map-unit-div', justify='around', children=[
-                dbc.Col(width=4, children=[
-                    html.Label('Select figure to measure'),
-                    dcc.Dropdown(
-                        id='select-map-unit',
-                        options=[
-                            {'label': 'Confirmed', 'value': 'confirmed'},
-                            {'label': 'Deaths', 'value': 'deaths'},
-                        ],
-                        value='confirmed'
-                    ),
-                ]),
-            ]),
-            dbc.Row(className='covid-report-row', justify='around', children=[
-                dbc.Col(id='covid-bubble-map', className='covid-report-plot', width=12, children=[
-                    dcc.Graph(
-                        figure=go.Figure(go.Scattergeo(
-                            lon=df_current['longitude'],
-                            lat=df_current['latitude'],
-                            text='Country: ' + df_current['country']
-                                 + '<br>Confirmed: ' + df_current['confirmed'].astype(str)
-                                 + '<br>Deaths: ' + df_current['deaths'].astype(str),
-                            visible=True,
-                            marker={
-                                'size': list(df_current['confirmed'].values),
-                                'sizeref': 2. * df_current['confirmed'].max() / (20.**2),
-                                'color': 'green',
-                            }
-                        )),
-                        style={'height': '100%', 'width': '100%'}
-                    )
-                ]),
-                # dbc.Col(width=4, children=[
-                #
-                # ]),
-            ])
-        ]),
+        ])
     ])
-
 ])
 
 
