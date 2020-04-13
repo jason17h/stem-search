@@ -15,7 +15,7 @@ covid_papers = pd.read_parquet('data/cord_papers.parquet').loc[:, paper_columns]
 
 NUM_OF_RECS = 20
 
-with open('model/kmeans.pkl', 'rb') as f:
+with open('model/arxiv_model.pkl', 'rb') as f:
     arxiv_model = pickle.load(f)
 
 with open('model/tfidf_vectorizer.pkl', 'rb') as f:

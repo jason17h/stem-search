@@ -2,3 +2,9 @@
 *.pkl
 *.parquet
 *.csv
+
+*.pyc
+.DS_Store
+.env
+
+to_aws.py

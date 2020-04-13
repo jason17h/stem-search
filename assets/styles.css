@@ -59,7 +59,8 @@ body {
     background-color: white;
     padding-bottom: 10px;
     margin-bottom: 20px;
-    border-bottom: #6DAC4FFF 3px solid;
+    /*border-bottom: #6DAC4FFF 3px solid;*/
+    border-bottom: #0A5E2AFF 3px solid;
 }
 
 #page-header-col {
