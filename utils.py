@@ -41,7 +41,7 @@ NUM_OF_RECS = 20
 with fs.open('s3://stemsearch/arxiv_model.pkl') as f:
     arxiv_model = pickle.load(f)
 
-with fs.open('s3://stemsearch/arxiv_model.pkl') as f:
+with fs.open('s3://stemsearch/tfidf_vectorizer.pkl') as f:
     arxiv_vectorizer = pickle.load(f)
 
 with fs.open('s3://stemsearch/covid_model.pkl') as f:

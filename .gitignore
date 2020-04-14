@@ -8,3 +8,4 @@
 .env
 
 to_aws.py
+test.py
