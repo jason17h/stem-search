@@ -5,6 +5,7 @@ import pickle
 from sklearn.metrics.pairwise import cosine_similarity
 
 import s3fs
+import time
 
 import requests
 import typing
@@ -18,11 +19,13 @@ fs = s3fs.S3FileSystem(anon=False)
 response = requests.get('https://corona-api.com/countries')
 country_data = response.json()['data']
 
+ts = time.time()
 paper_columns = ['title', 'authors', 'abstract']
 # arxiv_papers = pd.read_parquet('data/arxiv_papers.parquet').loc[:, paper_columns]
 # covid_papers = pd.read_parquet('data/cord_papers.parquet').loc[:, paper_columns]
-arxiv_papers = pd.read_parquet('s3://stemsearch/arxiv_papers.parquet')
-covid_papers = pd.read_parquet('s3://stemsearch/cord_papers.parquet')
+arxiv_papers = pd.read_parquet('s3://stemsearch/arxiv_papers.parquet').loc[:, paper_columns]
+covid_papers = pd.read_parquet('s3://stemsearch/cord_papers.parquet').loc[:, paper_columns]
+print('Loaded parquet files!')
 
 NUM_OF_RECS = 20
 
@@ -50,6 +53,10 @@ with fs.open('s3://stemsearch/covid_model.pkl') as f:
 with fs.open('s3://stemsearch/covid_tfidf_vectorizer.pkl') as f:
     covid_vectorizer = pickle.load(f)
 
+print('Loaded models!')
+
+te = time.time()
+print('Time elapsed loading data: {}s'.format(te-ts))
 
 def get_text(title: typing.Union[pd.Series, str],
              abstract: typing.Union[pd.Series, str]) -> typing.Union[pd.Series, str]:
