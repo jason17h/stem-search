@@ -1,30 +1,53 @@
+import os
 import pandas as pd
 import numpy as np
 import pickle
 from sklearn.metrics.pairwise import cosine_similarity
 
+import s3fs
+
 import requests
 import typing
+
+ACCESS_KEY_ID = os.environ.get('STEMSEARCH_AWS_ACCESS_KEY_ID')
+SECRET_ACCESS_KEY = os.environ.get('STEMSEARCH_AWS_SECRET_ACCESS_KEY')
+BUCKET_NAME = os.environ.get('STEMSEARCH_AWS_BUCKET_NAME')
+
+fs = s3fs.S3FileSystem(anon=False)
 
 response = requests.get('https://corona-api.com/countries')
 country_data = response.json()['data']
 
 paper_columns = ['title', 'authors', 'abstract']
-arxiv_papers = pd.read_parquet('data/papers.parquet').loc[:, paper_columns]
-covid_papers = pd.read_parquet('data/cord_papers.parquet').loc[:, paper_columns]
+# arxiv_papers = pd.read_parquet('data/arxiv_papers.parquet').loc[:, paper_columns]
+# covid_papers = pd.read_parquet('data/cord_papers.parquet').loc[:, paper_columns]
+arxiv_papers = pd.read_parquet('s3://stemsearch/arxiv_papers.parquet')
+covid_papers = pd.read_parquet('s3://stemsearch/cord_papers.parquet')
 
 NUM_OF_RECS = 20
 
-with open('model/arxiv_model.pkl', 'rb') as f:
+# with open('model/arxiv_model.pkl', 'rb') as f:
+#     arxiv_model = pickle.load(f)
+#
+# with open('model/tfidf_vectorizer.pkl', 'rb') as f:
+#     arxiv_vectorizer = pickle.load(f)
+#
+# with open('model/covid_model.pkl', 'rb') as f:
+#     covid_model = pickle.load(f)
+#
+# with open('model/covid_tfidf_vectorizer.pkl', 'rb') as f:
+#     covid_vectorizer = pickle.load(f)
+
+with fs.open('s3://stemsearch/arxiv_model.pkl') as f:
     arxiv_model = pickle.load(f)
 
-with open('model/tfidf_vectorizer.pkl', 'rb') as f:
+with fs.open('s3://stemsearch/arxiv_model.pkl') as f:
     arxiv_vectorizer = pickle.load(f)
 
-with open('model/covid_model.pkl', 'rb') as f:
+with fs.open('s3://stemsearch/covid_model.pkl') as f:
     covid_model = pickle.load(f)
 
-with open('model/covid_tfidf_vectorizer.pkl', 'rb') as f:
+with fs.open('s3://stemsearch/covid_tfidf_vectorizer.pkl') as f:
     covid_vectorizer = pickle.load(f)
 
 
