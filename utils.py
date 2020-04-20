@@ -9,6 +9,9 @@ import time
 
 import requests
 import typing
+import logging as log
+
+log.basicConfig(format='%(asctime)s: %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=log.INFO)
 
 ACCESS_KEY_ID = os.environ.get('STEMSEARCH_AWS_ACCESS_KEY_ID')
 SECRET_ACCESS_KEY = os.environ.get('STEMSEARCH_AWS_SECRET_ACCESS_KEY')
@@ -21,42 +24,42 @@ country_data = response.json()['data']
 
 ts = time.time()
 paper_columns = ['title', 'authors', 'abstract']
-# arxiv_papers = pd.read_parquet('data/arxiv_papers.parquet').loc[:, paper_columns]
-# covid_papers = pd.read_parquet('data/cord_papers.parquet').loc[:, paper_columns]
-arxiv_papers = pd.read_parquet('s3://stemsearch/arxiv_papers.parquet').loc[:, paper_columns]
-covid_papers = pd.read_parquet('s3://stemsearch/cord_papers.parquet').loc[:, paper_columns]
-print('Loaded parquet files!')
+arxiv_papers = pd.read_parquet('data/arxiv_papers.parquet').loc[:, paper_columns]
+covid_papers = pd.read_parquet('data/cord_papers.parquet').loc[:, paper_columns]
+# arxiv_papers = pd.read_parquet('s3://stemsearch/arxiv_papers.parquet').loc[:, paper_columns]
+# covid_papers = pd.read_parquet('s3://stemsearch/cord_papers.parquet').loc[:, paper_columns]
+log.info('Loaded parquet files!')
 
 NUM_OF_RECS = 20
 
-# with open('model/arxiv_model.pkl', 'rb') as f:
-#     arxiv_model = pickle.load(f)
-#
-# with open('model/tfidf_vectorizer.pkl', 'rb') as f:
-#     arxiv_vectorizer = pickle.load(f)
-#
-# with open('model/covid_model.pkl', 'rb') as f:
-#     covid_model = pickle.load(f)
-#
-# with open('model/covid_tfidf_vectorizer.pkl', 'rb') as f:
-#     covid_vectorizer = pickle.load(f)
-
-with fs.open('s3://stemsearch/arxiv_model.pkl') as f:
+with open('model/arxiv_model.pkl', 'rb') as f:
     arxiv_model = pickle.load(f)
 
-with fs.open('s3://stemsearch/tfidf_vectorizer.pkl') as f:
+with open('model/arxiv_tfidf_vectorizer.pkl', 'rb') as f:
     arxiv_vectorizer = pickle.load(f)
 
-with fs.open('s3://stemsearch/covid_model.pkl') as f:
+with open('model/covid_model.pkl', 'rb') as f:
     covid_model = pickle.load(f)
 
-with fs.open('s3://stemsearch/covid_tfidf_vectorizer.pkl') as f:
+with open('model/covid_tfidf_vectorizer.pkl', 'rb') as f:
     covid_vectorizer = pickle.load(f)
 
-print('Loaded models!')
+# with fs.open('s3://stemsearch/arxiv_model.pkl') as f:
+#     arxiv_model = pickle.load(f)
+#
+# with fs.open('s3://stemsearch/tfidf_vectorizer.pkl') as f:
+#     arxiv_vectorizer = pickle.load(f)
+#
+# with fs.open('s3://stemsearch/covid_model.pkl') as f:
+#     covid_model = pickle.load(f)
+#
+# with fs.open('s3://stemsearch/covid_tfidf_vectorizer.pkl') as f:
+#     covid_vectorizer = pickle.load(f)
+
+log.info('Loaded models!')
 
 te = time.time()
-print('Time elapsed loading data: {}s'.format(te-ts))
+log.info('Time elapsed loading data: {}s'.format(te-ts))
 
 def get_text(title: typing.Union[pd.Series, str],
              abstract: typing.Union[pd.Series, str]) -> typing.Union[pd.Series, str]:
