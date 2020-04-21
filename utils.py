@@ -63,7 +63,7 @@ log.info('Time elapsed loading data: {}s'.format(te-ts))
 
 def get_text(title: typing.Union[pd.Series, str],
              abstract: typing.Union[pd.Series, str]) -> typing.Union[pd.Series, str]:
-    return title * 3 + abstract
+    return title * 2 + abstract
 
 
 def process_current_covid_data(data: typing.List[dict]) -> dict:
