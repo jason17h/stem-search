@@ -6,6 +6,11 @@ Created by: Jason Huang (@jason17h)
 ## Setup
 Note that the setup process will take many hours.
 
+### Environment
+Set up the conda environment using `conda env create -f env.yml`. 
+
+If you are using `pip`, run `pip install -r requirements.txt`.
+
 ### Retrieving data
 Clone the following repository and follow the instructions for harvesting the metadata: 
 https://github.com/mattbierbaum/arxiv-public-datasets
