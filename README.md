@@ -42,6 +42,8 @@ STEMSearch uses k-means clustering to group similar articles based on the term f
 - `cosine_similarity`: 
     - https://scikit-learn.org/stable/modules/generated/sklearn.metrics.pairwise.cosine_similarity.html
     - https://en.wikipedia.org/wiki/Cosine_similarity
+    
+Use the *elbow method*, found in `scripts/elbow.py`, to fine-tune the number of clusters, *k*.
 
 ## Usage
 
