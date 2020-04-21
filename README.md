@@ -17,7 +17,7 @@ This will download the entire ArXiv metadata set at the default location of
 
 Next, find the COVID-19 Open Research Dataset (CORD-19) on Kaggle and download the metadata file:
 https://www.kaggle.com/allen-institute-for-ai/CORD-19-research-challenge#metadata.csv. Rename this file as 
-`cord_metadata.csv` to distinguish between our arXiv and CORD-19 metadata sets, and place it in `stem-search/data`.
+`cord_metadata_raw.csv` to distinguish between our arXiv and CORD-19 metadata sets, and place it in `stem-search/data`.
 
 ### Processing data
 The script to process the data can be found in `scripts/process_data.py`. Run this via `python scripts/process_data.py`.

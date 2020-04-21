@@ -21,7 +21,7 @@ df_arxiv.loc[:, ['title', 'authors', 'abstract']].to_parquet('../data/arxiv_pape
 
 
 # Load the data – sourced from CORD-19
-df_cord = pd.read_csv('../data/cord_metadata.csv')
+df_cord = pd.read_csv('../data/cord_metadata_raw.csv')
 
 # Extract only the articles with both a title and an abstract
 has_title = ~df_cord.loc[:, 'title'].isna()
