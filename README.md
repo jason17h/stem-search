@@ -28,7 +28,7 @@ https://www.kaggle.com/allen-institute-for-ai/CORD-19-research-challenge#metadat
 The script to process the data can be found in `scripts/process_data.py`. Run this via `python scripts/process_data.py`.
 Steps in the data processing include:
 - Processing the arXiv metadata into a DataFrame
-- Filtering `cord_papers.csv` for entries with both a title and an abstract
+- Filtering `cord_metadata_raw.csv` for entries with both a title and an abstract
 - Extracting useful columns in each metadata set to save space
 - Exporting the processed data into parquet files
 
@@ -48,7 +48,7 @@ STEMSearch uses k-means clustering to group similar articles based on the term f
     - https://scikit-learn.org/stable/modules/generated/sklearn.metrics.pairwise.cosine_similarity.html
     - https://en.wikipedia.org/wiki/Cosine_similarity
     
-Use the *elbow method*, found in `scripts/elbow.py`, to fine-tune the number of clusters, *k*.
+The script found in `scripts/elbow.py` is used to fine-tune the number of clusters, *k*, using the *elbow method*. Read more here: https://www.geeksforgeeks.org/elbow-method-for-optimal-value-of-k-in-kmeans/
 
 ## Usage
 
