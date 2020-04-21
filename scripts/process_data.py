@@ -17,7 +17,7 @@ for line in open(arxiv_metadata_path):
 df_arxiv = pd.DataFrame(arxiv_data)
 
 # Save storage space by only saving relevant columns
-df_arxiv.loc[:, ['title', 'authors', 'abstract']].to_parquet('..data/arxiv_papers.parquet')
+df_arxiv.loc[:, ['title', 'authors', 'abstract']].to_parquet('../data/arxiv_papers.parquet')
 
 
 # Load the data – sourced from CORD-19
