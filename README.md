@@ -1,6 +1,5 @@
 # stem-search
-STEMSearch – Research made easy! Find academic articles from a variety of sources to further your research projects.
-
+STEMSearch – Research made easy! Find journal articles from a variety of credible sources to further your research projects using this intelligent academic paper recommender.
 Created by: Jason Huang (@jason17h)
 
 ## Setup
