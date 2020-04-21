@@ -89,8 +89,12 @@ app.layout = html.Div(children=[
                                     html.Br(),
                                     html.P(
                                         id='recommended-articles-cord-19-text',
+                                        # TODO: FINISH THIS PARAGRAPH
                                         children="""
-                                        If your research is specific to the COVID-19 pandemic, you may find it useful
+                                            If your research is specific to the COVID-19 pandemic, you may find it 
+                                            useful to toggle the switch to the CORD-19 data set. CORD-19 stands for 
+                                            COVID-19 Open Research Dataset and contains many articles pertaining to 
+                                            coronaviruses.
                                         """,
                                         style={'borderTop': '#FE0000FF'}
                                     ),
@@ -121,6 +125,12 @@ app.layout = html.Div(children=[
                                     100: {'label': '100'},
                                 }
                             ),
+                            html.Br(),
+                            html.P("""
+                                TF-IDF stands for term frequency-inverse document frequency. It is a quantified measure
+                                of how important a term is to a document relative to the rest of the corpus. Use the
+                                slider to adjust how many terms to show on the graph to the right.
+                            """)
                         ]),
                     ]),
                 ]),
@@ -263,9 +273,6 @@ app.layout = html.Div(children=[
                             style={'height': '100%', 'width': '100%'}
                         )
                     ]),
-                    # dbc.Col(width=4, children=[
-                    #
-                    # ]),
                 ])
             ]),
         ])
