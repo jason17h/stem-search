@@ -6,6 +6,11 @@
 *.pyc
 .DS_Store
 .env
+.idea/
+__pycache__/
+.ipynb_checkpoints/
 
 to_aws.py
 test.py
+cord_sse_1.png
+cord_sse_2.png

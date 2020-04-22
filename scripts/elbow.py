@@ -10,7 +10,7 @@ log.basicConfig(format='%(asctime)s: %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p
 
 sse = []
 x = []
-BATCH = 1500
+BATCH = 2500
 
 log.info('Reading data...')
 df = pd.read_parquet('../data/arxiv_papers.parquet')
@@ -22,7 +22,7 @@ tfidf = vec.fit_transform(df.loc[:, 'title'] * 2 + df.loc[:, 'abstract'])
 
 log.info('Begin elbow method')
 
-for k in range(500, 1500, 100):
+for k in range(800, 2000, 100):
     log.info('k = {}'.format(k))
 
     # Create model
@@ -42,9 +42,9 @@ for k in range(500, 1500, 100):
     print(sse)
 
 log.info('Plot the data...')
-plt.plot(x, sse, '-o', label='arXiv (batch size {})'.format(BATCH))
+plt.plot(x, sse, '-o', label='cord (batch size {})'.format(BATCH))
 plt.legend()
 plt.xlabel('k')
 plt.ylabel('SSE')
 plt.show()
-plt.savefig('../sse.png')
+plt.savefig('../arxiv_sse_2.png')

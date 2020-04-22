@@ -58,7 +58,12 @@ STEMSearch was created using Dash which runs on a Flask server. To run the appli
 
 ### Using the application
 The application is straightforward: to get article recommendations, enter the titles/abstracts of the journals you have
-consulted already under the *My articles* tab and view the recommendations under the *Recommended* tab.
+consulted already under the *My articles* tab:
+![my_articles](setup_images/my_articles.png) 
+ 
+ 
+and view the recommendations under the *Recommended* tab:
+![recommended](setup_images/recommended.png)
 
 By default, the *Recommended* tab will show the top 20 similar articles. This can be changed by setting the `NUM_OF_RECS`
 constant in `utils.py`. The articles are listed from most to least similar among those 20. Use the switch to toggle
@@ -68,10 +73,13 @@ The green badges above each recommended article abstract represent the most impo
 exceeding a TF-IDF of 0.25) listed from most to least important. The *My TF-IDF* tab shows a graphical representation
 of the most important terms in the user-provided corpus. The slider can be used to control how many words to display
 in the graph.
+![my_tfidf](setup_images/my_tfidf.png)
 
 The COVID-19 dashboard can be found at the bottom of the page below the article recommendation system. 
 
 The *Scatter* tab will display the data in a scatter plot. Set the unit and scale for each axis as desired. 
 Select a subset of the plot using box selection.
+![covid_scatter_plot](setup_images/scatter.png)
 
 The *Map* tab will display the data in a bubble map. Select which figure to measure using the dropdown at the top.
+![covid_bubble_map](setup_images/map.png)
