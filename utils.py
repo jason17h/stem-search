@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import pickle
 from sklearn.metrics.pairwise import cosine_similarity
+import joblib
 
 import s3fs
 import time
@@ -32,28 +33,28 @@ log.info('Loaded parquet files!')
 
 NUM_OF_RECS = 20
 
-with open('model/arxiv_model.pkl', 'rb') as f:
+with open('model/arxiv/model.pkl', 'rb') as f:
     arxiv_model = pickle.load(f)
 
-with open('model/arxiv_tfidf_vectorizer.pkl', 'rb') as f:
+with open('model/arxiv/vectorizer.pkl', 'rb') as f:
     arxiv_vectorizer = pickle.load(f)
 
-with open('model/covid_model.pkl', 'rb') as f:
+with open('model/cord/model.pkl', 'rb') as f:
     covid_model = pickle.load(f)
 
-with open('model/covid_tfidf_vectorizer.pkl', 'rb') as f:
+with open('model/cord/vectorizer.pkl', 'rb') as f:
     covid_vectorizer = pickle.load(f)
 
-# with fs.open('s3://stemsearch/arxiv_model.pkl') as f:
+# with fs.open('s3://stemsearch/model.pkl') as f:
 #     arxiv_model = pickle.load(f)
 #
 # with fs.open('s3://stemsearch/tfidf_vectorizer.pkl') as f:
 #     arxiv_vectorizer = pickle.load(f)
 #
-# with fs.open('s3://stemsearch/covid_model.pkl') as f:
+# with fs.open('s3://stemsearch/model.pkl') as f:
 #     covid_model = pickle.load(f)
 #
-# with fs.open('s3://stemsearch/covid_tfidf_vectorizer.pkl') as f:
+# with fs.open('s3://stemsearch/vectorizer.pkl') as f:
 #     covid_vectorizer = pickle.load(f)
 
 log.info('Loaded models!')
